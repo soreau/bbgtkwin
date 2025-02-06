@@ -1,0 +1,7 @@
+This project builds the GTK and Python framework for BleachBit
+to use on Windows.
+
+It uses vcpkg to build GTK with introspection.
+
+Special thanks to @soylent-io for work to keep BleachBit
+running on Windows.

@@ -1,0 +1,80 @@
+name: Build and Package Python and GTK
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    env:
+      VCPKG_COMMIT: '058088532e33f23ac1ad31e32ad0bb1ab8e32195'
+      VCPKG_DEFAULT_TRIPLET: 'x86-windows'
+      VCPKG_INSTALLED_DIR: ${{ github.workspace }}/vcpkg/installed
+      GTK_VERSION: 3.24
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up MSVC++ 2015
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x86
+
+    - name: Install vcpkg dependencies
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: ${{ env.VCPKG_COMMIT }}
+
+    - name: Cache vcpkg
+      uses: actions/cache@v3
+      with:
+        path: |
+          ${{ github.workspace }}/vcpkg/installed
+          ${{ github.workspace }}/vcpkg/packages
+          ${{ github.workspace }}/vcpkg/downloads
+        key: vcpkg-${{ runner.os }}-${{ env.VCPKG_COMMIT }}-${{ hashFiles('vcpkg.json') }}
+
+    - name: vcpkg install
+      shell: cmd
+      env:
+        VCPKG_BINARY_SOURCES: 'clear;nuget,GitHub,readwrite'
+      run: |
+        %VCPKG_ROOT%\vcpkg.exe install --triplet=${{ env.VCPKG_DEFAULT_TRIPLET }}
+
+    # So the artifact keeps all directory levels.
+    - name: Create empty file
+      shell: cmd
+      run: |
+        type nul > vcpkg_installed\empty
+
+    - name: Package the build
+      shell: cmd
+      run: |
+        rmdir /s /q vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\debug
+        7z a -tzip -mx=9 gtk${{ env.GTK_VERSION }}-${{ env.VCPKG_DEFAULT_TRIPLET }}.zip vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}
+        certutil -hashfile gtk${{ env.GTK_VERSION }}-${{ env.VCPKG_DEFAULT_TRIPLET }}.zip SHA256
+
+    # This action cannot upload the existing zip file: it always makes archives
+    # the path into a zip file.
+    - name: Upload the build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: gtk${{ env.GTK_VERSION }}-${{ env.VCPKG_DEFAULT_TRIPLET }}
+        path: vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}
+        if-no-files-found: error
+
+    # Create GitHub Release when a tag is pushed
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v2
+      with:
+        files: gtk${{ env.GTK_VERSION }}-${{ env.VCPKG_DEFAULT_TRIPLET }}.zip
+        generate_release_notes: true
