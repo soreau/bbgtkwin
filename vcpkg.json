@@ -1,11 +1,13 @@
 {
   "dependencies": [
+    "getopt",
     {
       "name": "gtk3",
       "features": [
         "introspection"
       ]
     },
-    "librsvg"
+    "librsvg",
+    "pkgconf"
   ]
 }
