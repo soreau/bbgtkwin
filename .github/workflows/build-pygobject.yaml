@@ -33,7 +33,7 @@ jobs:
       - name: Set up MSYS2
         uses: msys2/setup-msys2@v2
         with:
-          install: mingw-w64-i686-pkg-config
+          install: mingw-w64-i686-pkg-config mingw-w64-gcc
           msystem: MINGW32
 
       - name: Download GTK artifacts
