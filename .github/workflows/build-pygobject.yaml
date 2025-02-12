@@ -21,10 +21,6 @@ jobs:
       PYTHON_PATH: '${{ github.workspace }}\gtk3.24\vcpkg_installed\x86-windows\tools\python3'
       PYTHON_EXE: '${{ github.workspace }}\gtk3.24\vcpkg_installed\x86-windows\tools\python3\python.exe'
       PYSCRIPT_DIR: '${{ github.workspace }}\gtk3.24\vcpkg_installed\x86-windows\tools\python3\scripts'
-      CFLAGS: '-m32 -I${{ github.workspace }}\gtk3.24\vcpkg_installed\x86-windows\include\python3.11'
-      CXXFLAGS: '-m32 -I${{ github.workspace }}\gtk3.24\vcpkg_installed\x86-windows\include\python3.11'
-      CC: gcc
-      CXX: g++
 
     steps:
       - uses: actions/checkout@v3
@@ -71,6 +67,10 @@ jobs:
         env:
           PATH: 'C:\ProgramData\mingw64\mingw32\bin;%PATH%'
           PKG_CONFIG_PATH: ${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\pkgconfig
+          CFLAGS: '-I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
+          CXXFLAGS: '-I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
+          CC: gcc
+          CXX: g++
         run: |
           cd pygobject-%PYGOBJECT_VERSION%
           echo copying python311.lib as a workaround
