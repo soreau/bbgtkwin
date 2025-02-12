@@ -62,22 +62,15 @@ jobs:
           %PYTHON_EXE% -m ensurepip --upgrade
           set PATH=%PATH%;%PYSCRIPT_DIR%
           %PYTHON_EXE% -m pip install wheel setuptools build pycairo meson ninja
+          choco install pkgconfiglite
 
       - name: Build wheel
         env:
           PKG_CONFIG_PATH: ${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\pkgconfig
         run: |
           echo ${{ env.PATH }}
-          dir "C:\mingw64\bin"
-          dir "C:\Program Files\Git\mingw64\bin"
-          choco install pkgconfiglite
-          dir "C:\mingw64\bin"
-          dir "C:\Program Files\Git\mingw64\bin"
+          dir "C:\ProgramData\chocolatey\lib\pkgconfiglite\tools"
           cd pygobject-%PYGOBJECT_VERSION%
-          echo copying python311.lib as a workaround
-          mkdir "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
-          copy "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\python311.lib" "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
-          dir "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
           "%PYSCRIPT_DIR%\meson" setup builddir --prefix="%CD%\dist" --backend=ninja -Dpython="%PYTHON_EXE%" -Dbuildtype=release --includedir "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11"
           "%PYSCRIPT_DIR%\ninja" -C builddir
           "%PYSCRIPT_DIR%\ninja" -C builddir install
