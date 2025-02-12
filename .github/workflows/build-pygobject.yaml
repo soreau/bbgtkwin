@@ -23,16 +23,21 @@ jobs:
       PYSCRIPT_DIR: '${{ github.workspace }}\gtk3.24\vcpkg_installed\x86-windows\tools\python3\scripts'
       CC: gcc
       CXX: g++
-      CFLAGS: '-m32 -I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
-      CXXFLAGS: '-m32 -I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
+      CFLAGS: '-m32 -I${{ github.workspace }}\gtk${{ GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
+      CXXFLAGS: '-m32 -I${{ github.workspace }}\gtk${{ GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
 
     steps:
       - uses: actions/checkout@v3
 
+      - name: Set up MSVC++ 2015
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86
+
       - name: Set up MinGW 32bit
         uses: egor-tensin/setup-mingw@v2
         with:
-          arch: x86
+          platform: x86
 
       - name: Download GTK artifacts
         uses: dawidd6/action-download-artifact@v2
