@@ -29,7 +29,7 @@ jobs:
       - name: Set up MSVC++ 2015
         uses: ilammy/msvc-dev-cmd@v1
         with:
-          arch: x86
+          arch: x86_64
 
       - name: Download GTK artifacts
         uses: dawidd6/action-download-artifact@v2
@@ -62,16 +62,15 @@ jobs:
           %PYTHON_EXE% -m ensurepip --upgrade
           set PATH=%PATH%;%PYSCRIPT_DIR%
           %PYTHON_EXE% -m pip install wheel setuptools build pycairo meson ninja
-          choco install pkgconfiglite --x86
+          choco install pkgconfiglite
 
       - name: Build wheel
         env:
-          PATH: 'C:\msys64\mingw32\bin;${{ env.PATH }};${{ env.PYSCRIPT_DIR }}'
           PKG_CONFIG_PATH: ${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\pkgconfig
           CC: gcc
           CXX: g++
-          CFLAGS: '-m32 -I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
-          CXXFLAGS: '-m32 -I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
+          CFLAGS: '-I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
+          CXXFLAGS: '-I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
         run: |
           cd pygobject-%PYGOBJECT_VERSION%
           echo copying python311.lib as a workaround
