@@ -76,9 +76,9 @@ jobs:
           mkdir "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
           copy "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\python311.lib" "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
           dir "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
-          "meson" setup builddir --prefix="%CD%\dist" --backend=ninja -Dbuildtype=release
-          "ninja" -C builddir
-          "ninja" -C builddir install
+          meson setup builddir --prefix="%CD%\dist" --backend=ninja -Dbuildtype=release
+          ninja -C builddir
+          ninja -C builddir install
           cd dist
           "%PYTHON_EXE%" -m build --wheel
           dir /b /s *.whl
