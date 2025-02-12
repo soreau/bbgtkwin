@@ -66,7 +66,6 @@ jobs:
 
       - name: Build wheel
         env:
-          PATH: ${{ env.PATH }};${{ env.PYSCRIPT_DIR }}
           PKG_CONFIG_PATH: ${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\pkgconfig
           CL: '-I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
         run: |
@@ -75,7 +74,7 @@ jobs:
           mkdir "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
           copy "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\python311.lib" "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
           dir "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
-          "%PYSCRIPT_DIR%\meson" setup builddir --vsenv --prefix="%CD%\dist" --backend=ninja -Dpython="%PYTHON_EXE%" -Dbuildtype=release -Dtests=false
+          "%PYSCRIPT_DIR%\meson" setup builddir --prefix="%CD%\dist" --backend=ninja -Dpython="%PYTHON_EXE%" -Dbuildtype=release -Dtests=false
           "%PYSCRIPT_DIR%\ninja" -C builddir
           "%PYSCRIPT_DIR%\ninja" -C builddir install
           cd dist
