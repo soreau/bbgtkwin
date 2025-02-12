@@ -19,7 +19,6 @@ jobs:
       GTK_VERSION: 3.24
       VCPKG_DEFAULT_TRIPLET: 'x86-windows'
       PYTHON_PATH: '${{ github.workspace }}\gtk3.24\vcpkg_installed\x86-windows\tools\python3'
-      PYTHONPATH: '${{ github.workspace }}\gtk3.24\vcpkg_installed\x86-windows\tools\python3\lib\site-packages'
       PYTHON_EXE: '${{ github.workspace }}\gtk3.24\vcpkg_installed\x86-windows\tools\python3\python.exe'
       PYSCRIPT_DIR: '${{ github.workspace }}\gtk3.24\vcpkg_installed\x86-windows\tools\python3\scripts'
 
@@ -77,9 +76,9 @@ jobs:
           mkdir "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
           copy "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\python311.lib" "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
           dir "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
-          "%PYSCRIPT_DIR%\meson" setup builddir --prefix="%CD%\dist" --backend=ninja -Dbuildtype=release
-          "%PYSCRIPT_DIR%\ninja" -C builddir
-          "%PYSCRIPT_DIR%\ninja" -C builddir install
+          "meson" setup builddir --prefix="%CD%\dist" --backend=ninja -Dbuildtype=release
+          "ninja" -C builddir
+          "ninja" -C builddir install
           cd dist
           "%PYTHON_EXE%" -m build --wheel
           dir /b /s *.whl
