@@ -70,7 +70,7 @@ jobs:
 
       - name: Build wheel
         env:
-          PATH: ${{ env.PATH }};${{ env.PYSCRIPT_DIR }}
+          PATH: 'C:\mingw32\bin;C:\msys64\usr\bin;C:\Strawberry\perl\bin;${{ env.PATH }};${{ env.PYSCRIPT_DIR }}'
           PKG_CONFIG_PATH: ${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\pkgconfig
           CFLAGS: '-I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
           CXXFLAGS: '-I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
