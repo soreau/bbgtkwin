@@ -90,7 +90,7 @@ jobs:
           "%PYSCRIPT_DIR%\ninja" -C builddir
           "%PYSCRIPT_DIR%\ninja" -C builddir install
           cd dist
-          "%PYTHON_EXE%" -m build --wheel
+          "%PYTHON_EXE%" -m build --sdist
           dir /b /s *.whl
         shell: cmd
 
