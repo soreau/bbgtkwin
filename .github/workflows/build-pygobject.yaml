@@ -48,6 +48,8 @@ jobs:
       - name: Extract GTK files
         shell: cmd
         run: |
+          find "C:\" -name 'pkg-config*'
+          find "D:\" -name 'pkg-config*'
           cd gtk${{ env.GTK_VERSION }}
           certutil -hashfile gtk${{ env.GTK_VERSION }}-x86-windows.zip SHA256
           7z x gtk${{ env.GTK_VERSION }}-x86-windows.zip
@@ -82,8 +84,6 @@ jobs:
           mkdir "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
           copy "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\python311.lib" "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
           dir "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
-          where pkg-config
-          where cmake
           "%PYSCRIPT_DIR%\meson" setup builddir --prefix="%CD%\dist" --backend=ninja -Dpython="%PYTHON_EXE%" -Dbuildtype=release -Dtests=false
           "%PYSCRIPT_DIR%\ninja" -C builddir
           "%PYSCRIPT_DIR%\ninja" -C builddir install
