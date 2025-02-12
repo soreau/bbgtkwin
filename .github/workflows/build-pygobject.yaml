@@ -61,7 +61,8 @@ jobs:
           %PYTHON_EXE% -m ensurepip --upgrade
           set PATH='%PATH%;%PYSCRIPT_DIR%
           %PYTHON_EXE% -m pip install wheel setuptools build pycairo meson ninja
-          choco install pkgconfiglite mingw --x86
+          choco install mingw --x86
+          pacman -S mingw-w64-i686-pkg-config
 
       - name: Build wheel
         env:
