@@ -99,12 +99,3 @@ jobs:
         with:
           name: pygobject-wheel
           path: ./pygobject-$PYGOBJECT_VERSION/dist/*.whl
-
-      # Release when a tag is pushed
-      - name: Release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: ./pygobject-${{ env.PYGOBJECT_VERSION }}/dist/*.whl
-          generate_release_notes: false
-          fail_on_unmatched_files: true
