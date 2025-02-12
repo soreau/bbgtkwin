@@ -65,8 +65,10 @@ jobs:
 
       - name: Build wheel
         env:
+          PATH: ${{ env.PATH }}
           PKG_CONFIG_PATH: ${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\pkgconfig
         run: |
+          echo ${{ env.PATH }}
           cd pygobject-%PYGOBJECT_VERSION%
           echo copying python311.lib as a workaround
           mkdir "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
