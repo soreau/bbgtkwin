@@ -34,11 +34,6 @@ jobs:
         with:
           arch: x86
 
-      - name: Set up MinGW 32bit
-        uses: egor-tensin/setup-mingw@v2
-        with:
-          platform: x86
-
       - name: Download GTK artifacts
         uses: dawidd6/action-download-artifact@v2
         with:
@@ -70,7 +65,7 @@ jobs:
           %PYTHON_EXE% -m ensurepip --upgrade
           set PATH=%PATH%;%PYSCRIPT_DIR%
           %PYTHON_EXE% -m pip install wheel setuptools build pycairo meson ninja
-          choco install pkgconfiglite --x86
+          choco install pkgconfiglite mingw --x86
 
       - name: Build wheel
         env:
