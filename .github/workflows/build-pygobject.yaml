@@ -17,10 +17,10 @@ jobs:
     env:
       PYGOBJECT_VERSION: 3.51.0
       GTK_VERSION: 3.24
-      VCPKG_DEFAULT_TRIPLET: 'x86-windows'
-      PYTHON_PATH: '${{ github.workspace }}\gtk3.24\vcpkg_installed\x86_64-windows\tools\python3'
-      PYTHON_EXE: '${{ github.workspace }}\gtk3.24\vcpkg_installed\x86_64-windows\tools\python3\python.exe'
-      PYSCRIPT_DIR: '${{ github.workspace }}\gtk3.24\vcpkg_installed\x86_64-windows\tools\python3\scripts'
+      VCPKG_DEFAULT_TRIPLET: 'x64-windows'
+      PYTHON_PATH: '${{ github.workspace }}\gtk3.24\vcpkg_installed\x64-windows\tools\python3'
+      PYTHON_EXE: '${{ github.workspace }}\gtk3.24\vcpkg_installed\x64-windows\tools\python3\python.exe'
+      PYSCRIPT_DIR: '${{ github.workspace }}\gtk3.24\vcpkg_installed\x64-windows\tools\python3\scripts'
 
 
     steps:
