@@ -57,15 +57,16 @@ jobs:
       - name: Install build dependencies
         shell: cmd
         env:
-          PATH: ${{ env.PYSCRIPT_DIR }};${{ env.PATH }}
+          PATH: ${{ env.PATH }};${{ env.PYSCRIPT_DIR }}
         run: |
           %PYTHON_EXE% -m ensurepip --upgrade
-          set PATH=%PYSCRIPT_DIR%;%PATH%
+          set PATH=%PATH%;%PYSCRIPT_DIR%
           %PYTHON_EXE% -m pip install wheel setuptools build pycairo meson ninja
           choco install pkgconfiglite --x86
 
       - name: Build wheel
         env:
+          PATH: ${{ env.PYSCRIPT_DIR }};${{ env.PATH }}
           PKG_CONFIG_PATH: ${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\pkgconfig
           CL: '-I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
         run: |
