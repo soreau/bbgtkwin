@@ -61,7 +61,7 @@ jobs:
         run: |
           %PYTHON_EXE% -m ensurepip --upgrade
           set PATH=%PATH%;%PYSCRIPT_DIR%
-          %PYTHON_EXE% -m pip install wheel setuptools build pycairo meson ninja
+          %PYTHON_EXE% -m pip install wheel setuptools build pycairo meson ninja python-dev
           choco install --x86 pkgconfiglite
 
       - name: Build wheel
