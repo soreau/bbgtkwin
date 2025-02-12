@@ -66,6 +66,7 @@ jobs:
 
       - name: Build wheel
         env:
+          PATH: ${{ env.PATH }};${{ env.PYSCRIPT_DIR }}
           PKG_CONFIG_PATH: ${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\pkgconfig
           CL: '-I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
         run: |
