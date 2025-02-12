@@ -30,6 +30,12 @@ jobs:
         with:
           arch: x86
 
+      - name: Set up MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          install: mingw-w64-i686-pkg-config
+          msystem: MINGW32
+
       - name: Download GTK artifacts
         uses: dawidd6/action-download-artifact@v2
         with:
@@ -62,7 +68,6 @@ jobs:
           set PATH='%PATH%;%PYSCRIPT_DIR%
           %PYTHON_EXE% -m pip install wheel setuptools build pycairo meson ninja
           choco install mingw --x86
-          pacman -S mingw-w64-i686-pkg-config
 
       - name: Build wheel
         env:
