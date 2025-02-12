@@ -70,7 +70,6 @@ jobs:
 
       - name: Build wheel
         env:
-          PATH: 'C:\mingw32\bin;C:\msys64\usr\bin;%PATH%;%PYSCRIPT_DIR%'
           PKG_CONFIG_PATH: ${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\pkgconfig
           CFLAGS: '-I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
           CXXFLAGS: '-I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
@@ -85,7 +84,7 @@ jobs:
           dir "C:\mingw32\bin"
           dir "C:\mingw32\i686-w64-mingw32\bin"
           dir "C:\msys64\usr\bin"
-          which pkg-config.exe
+          which pkg-config
           "%PYSCRIPT_DIR%\meson" setup builddir --prefix="%CD%\dist" --backend=ninja -Dpython="%PYTHON_EXE%" -Dbuildtype=release -Dtests=false
           "%PYSCRIPT_DIR%\ninja" -C builddir
           "%PYSCRIPT_DIR%\ninja" -C builddir install
