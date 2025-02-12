@@ -33,7 +33,6 @@ jobs:
       - name: Set up MSYS2
         uses: msys2/setup-msys2@v2
         with:
-          install: mingw-w64-i686-pkg-config
           msystem: MINGW32
 
       - name: Download GTK artifacts
@@ -67,6 +66,7 @@ jobs:
           %PYTHON_EXE% -m ensurepip --upgrade
           set PATH='%PATH%;%PYSCRIPT_DIR%
           %PYTHON_EXE% -m pip install wheel setuptools build pycairo meson ninja
+          pacman -S mingw-w64-i686-pkg-config
           choco install mingw --x86
 
       - name: Build wheel
