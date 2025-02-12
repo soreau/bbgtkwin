@@ -85,6 +85,7 @@ jobs:
           dir "C:\mingw32\bin"
           dir "C:\mingw32\i686-w64-mingw32\bin"
           dir "C:\msys64\usr\bin"
+          "C:\msys64\usr\bin\find" "C:\" -name pkg-config.exe
           "%PYSCRIPT_DIR%\meson" setup builddir --prefix="%CD%\dist" --backend=ninja -Dpython="%PYTHON_EXE%" -Dbuildtype=release -Dtests=false
           "%PYSCRIPT_DIR%\ninja" -C builddir
           "%PYSCRIPT_DIR%\ninja" -C builddir install
