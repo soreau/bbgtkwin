@@ -89,8 +89,7 @@ jobs:
           "%PYSCRIPT_DIR%\meson" setup builddir --prefix="%CD%\dist" --backend=ninja -Dpython="%PYTHON_EXE%" -Dbuildtype=release -Dtests=false -Dwheel=true
           "%PYSCRIPT_DIR%\ninja" -C builddir
           "%PYSCRIPT_DIR%\ninja" -C builddir install
-          cd dist
-          "%PYTHON_EXE%" -m build --sdist
+          "%PYTHON_EXE%" -m build --wheel
           dir /b /s *.whl
         shell: cmd
 
