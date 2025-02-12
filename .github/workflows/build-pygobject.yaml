@@ -65,10 +65,12 @@ jobs:
 
       - name: Build wheel
         env:
-          PATH: 'C:\Program Files\Git\mingw64\bin;${{ env.PATH }}'
           PKG_CONFIG_PATH: ${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\pkgconfig
         run: |
           echo ${{ env.PATH }}
+          dir "C:\mingw64\bin"
+          dir "C:\Program Files\Git\mingw64\bin"
+          choco install pkgconfiglite
           dir "C:\mingw64\bin"
           dir "C:\Program Files\Git\mingw64\bin"
           cd pygobject-%PYGOBJECT_VERSION%
