@@ -48,8 +48,6 @@ jobs:
       - name: Extract GTK files
         shell: cmd
         run: |
-          find "C:\" -name 'pkg-config*'
-          find "D:\" -name 'pkg-config*'
           cd gtk${{ env.GTK_VERSION }}
           certutil -hashfile gtk${{ env.GTK_VERSION }}-x86-windows.zip SHA256
           7z x gtk${{ env.GTK_VERSION }}-x86-windows.zip
@@ -72,7 +70,7 @@ jobs:
 
       - name: Build wheel
         env:
-          PATH: 'C:\mingw32\bin;%PATH%;%PYSCRIPT_DIR%'
+          PATH: 'C:\msys64\mingw32\bin;%PATH%;%PYSCRIPT_DIR%'
           PKG_CONFIG_PATH: ${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\pkgconfig
           CFLAGS: '-I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
           CXXFLAGS: '-I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
