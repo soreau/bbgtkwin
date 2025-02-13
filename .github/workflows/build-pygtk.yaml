@@ -59,7 +59,7 @@ jobs:
       shell: cmd
       run: |
         rmdir /s /q vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\debug
-        7z a -tzip -mx=9 gtk${{ env.GTK_VERSION }}-${{ env.VCPKG_DEFAULT_TRIPLET }}.zip vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}
+        7z a -tzip -mx=9 gtk${{ env.GTK_VERSION }}-${{ env.VCPKG_DEFAULT_TRIPLET }}.zip vcpkg_installed
         certutil -hashfile gtk${{ env.GTK_VERSION }}-${{ env.VCPKG_DEFAULT_TRIPLET }}.zip SHA256
 
     # This action cannot upload the existing zip file: it always makes archives
@@ -68,7 +68,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: gtk${{ env.GTK_VERSION }}-${{ env.VCPKG_DEFAULT_TRIPLET }}
-        path: vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}
+        path: vcpkg_installed
         if-no-files-found: error
 
     # Create GitHub Release when a tag is pushed
