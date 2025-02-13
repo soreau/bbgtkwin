@@ -65,7 +65,7 @@ jobs:
           PATH: ${{ env.PATH }};${{ env.PYSCRIPT_DIR }}
         run: |
           %PYTHON_EXE% -m ensurepip --upgrade
-          set PATH='%PATH%;%PYSCRIPT_DIR%
+          set PATH=%PATH%;%PYSCRIPT_DIR%
           %PYTHON_EXE% -m pip install wheel setuptools build pycairo meson ninja
           choco install pkgconfiglite --x86
 
