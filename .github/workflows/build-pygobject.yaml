@@ -33,7 +33,7 @@ jobs:
       - name: Set up MSYS2
         uses: msys2/setup-msys2@v2
         with:
-          install: mingw-w64-i686-pkg-config mingw-w64-i686-gcc
+          install: mingw-w64-i686-gcc
           msystem: MINGW32
 
       - name: Download GTK artifacts
@@ -82,11 +82,6 @@ jobs:
           echo copying python311.lib as a workaround
           mkdir "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
           copy "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\python311.lib" "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
-          dir "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
-          dir "C:\mingw32\bin"
-          dir "C:\mingw32\i686-w64-mingw32\bin"
-          dir "C:\msys64\usr\bin"
-          which pkg-config
           "%PYTHON_EXE%" -m build --wheel
           dir /b /s *.whl
         shell: cmd
