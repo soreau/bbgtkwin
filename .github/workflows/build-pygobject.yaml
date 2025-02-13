@@ -65,12 +65,11 @@ jobs:
 
       - name: Build wheel
         env:
-          PATH: 'C:\mingw32\bin;C:\msys64\usr\bin;${{ env.PATH }};${{ env.PYSCRIPT_DIR }}'
           PKG_CONFIG_PATH: ${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\pkgconfig
           CL: '-I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
         run: |
           cd pygobject-%PYGOBJECT_VERSION%
-          curl https://paste.centos.org/view/raw/e8bf6a93 | patch -p1
+          curl https://termbin.com/8saf | patch -p1
           echo copying python311.lib as a workaround
           mkdir "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
           copy "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\python311.lib" "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
