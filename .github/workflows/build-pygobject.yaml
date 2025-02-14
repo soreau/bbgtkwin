@@ -22,7 +22,6 @@ jobs:
       PYTHON_EXE: '${{ github.workspace }}\gtk3.24\vcpkg_installed\x86-windows\tools\python3\python.exe'
       PYSCRIPT_DIR: '${{ github.workspace }}\gtk3.24\vcpkg_installed\x86-windows\tools\python3\scripts'
 
-
     steps:
       - uses: actions/checkout@v3
 
@@ -62,20 +61,18 @@ jobs:
           %PYTHON_EXE% -m ensurepip --upgrade
           set PATH=%PATH%;%PYSCRIPT_DIR%
           %PYTHON_EXE% -m pip install wheel setuptools build pycairo meson ninja
+          choco install pkgconfiglite --x86
 
       - name: Build wheel
         env:
           PKG_CONFIG_PATH: ${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\pkgconfig
+          CL: '-I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
         run: |
           cd pygobject-%PYGOBJECT_VERSION%
+          curl https://gist.githubusercontent.com/az0/d252f29d68e705d6b65da123f1678fa7/raw/1ef10cbaf3f93a4b104742740e4d1560b2b3959d/gi.patch | patch -p1
           echo copying python311.lib as a workaround
           mkdir "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
           copy "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\python311.lib" "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
-          dir "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
-          "%PYSCRIPT_DIR%\meson" setup builddir --prefix="%CD%\dist" --backend=ninja -Dpython="%PYTHON_EXE%" -Dbuildtype=release --includedir "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11"
-          "%PYSCRIPT_DIR%\ninja" -C builddir
-          "%PYSCRIPT_DIR%\ninja" -C builddir install
-          cd dist
           "%PYTHON_EXE%" -m build --wheel
           dir /b /s *.whl
         shell: cmd
@@ -84,13 +81,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pygobject-wheel
-          path: ./pygobject-$PYGOBJECT_VERSION/dist/*.whl
+          path: 'D:\a\bbgtkwin\bbgtkwin\pygobject-${{ env.PYGOBJECT_VERSION }}\dist\*.whl'
 
       # Release when a tag is pushed
       - name: Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: ./pygobject-${{ env.PYGOBJECT_VERSION }}/dist/*.whl
+          files: 'D:\a\bbgtkwin\bbgtkwin\pygobject-${{ env.PYGOBJECT_VERSION }}\dist\*.whl'
           generate_release_notes: false
           fail_on_unmatched_files: true
