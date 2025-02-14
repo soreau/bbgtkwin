@@ -30,12 +30,6 @@ jobs:
         with:
           arch: x86
 
-      - name: Set up MSYS2
-        uses: msys2/setup-msys2@v2
-        with:
-          install: mingw-w64-i686-gcc
-          msystem: MINGW32
-
       - name: Download GTK artifacts
         uses: dawidd6/action-download-artifact@v2
         with:
@@ -71,14 +65,11 @@ jobs:
 
       - name: Build wheel
         env:
-          PATH: 'C:\mingw32\bin;C:\msys64\usr\bin;${{ env.PATH }};${{ env.PYSCRIPT_DIR }}'
           PKG_CONFIG_PATH: ${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\pkgconfig
-          CFLAGS: '-I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
-          CXXFLAGS: '-I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
-          CC: gcc
-          CXX: g++
+          CL: '-I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
         run: |
           cd pygobject-%PYGOBJECT_VERSION%
+          curl https://gist.githubusercontent.com/az0/d252f29d68e705d6b65da123f1678fa7/raw/1ef10cbaf3f93a4b104742740e4d1560b2b3959d/gi.patch | patch -p1
           echo copying python311.lib as a workaround
           mkdir "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
           copy "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\python311.lib" "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
@@ -90,4 +81,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pygobject-wheel
-          path: 'D:\a\bbgtkwin\bbgtkwin\pygobject-3.51.0\dist\*.whl'
+          path: 'D:\a\bbgtkwin\bbgtkwin\pygobject-${{ env.PYGOBJECT_VERSION }}\dist\*.whl'
+
+      # Release when a tag is pushed
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: 'D:\a\bbgtkwin\bbgtkwin\pygobject-${{ env.PYGOBJECT_VERSION }}\dist\*.whl'
+          generate_release_notes: false
+          fail_on_unmatched_files: true
