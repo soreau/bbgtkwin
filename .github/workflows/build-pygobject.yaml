@@ -77,6 +77,15 @@ jobs:
           dir /b /s *.whl
         shell: cmd
 
+      - name: Test wheel
+        env:
+          PATH: ${{ env.PATH }};${{ env.PYSCRIPT_DIR }}
+        run: |
+          cd pygobject-%PYGOBJECT_VERSION%
+          %PYTHON_EXE% -m pip install "D:\a\bbgtkwin\bbgtkwin\pygobject-${{ env.PYGOBJECT_VERSION }}\dist\pygobject-${{ env.PYGOBJECT_VERSION }}-cp311-cp311-win32.whl"
+          (echo "import gi" | %PYTHON_EXE%) && echo "gi import succeeded." || echo "gi import failed."
+        shell: cmd
+
       - name: Upload wheel
         uses: actions/upload-artifact@v4
         with:
