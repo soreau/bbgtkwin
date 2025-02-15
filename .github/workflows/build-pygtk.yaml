@@ -49,6 +49,13 @@ jobs:
       run: |
         %VCPKG_ROOT%\vcpkg.exe install --triplet=${{ env.VCPKG_DEFAULT_TRIPLET }}
 
+    - name: test the build
+      shell: cmd
+      run: |
+        vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\tools\python3\python.exe -V
+        vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\tools\python3\python.exe -m pip --version
+        vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\tools\python3\python.exe ${{ github.workspace }}/show_versions.py
+
     # So the artifact keeps all directory levels.
     - name: Create empty file
       shell: cmd

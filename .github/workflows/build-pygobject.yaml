@@ -51,6 +51,7 @@ jobs:
         run: |
           curl -L https://download.gnome.org/sources/pygobject/3.51/pygobject-${{ env.PYGOBJECT_VERSION }}.tar.xz -o pygobject.tar.xz
           certutil -hashfile pygobject.tar.xz SHA256
+          echo "5d8ec64b034a29a14c3739541436a07ea0de83c8a394c6e5ecaa9e2e5b7b4e72 pygobject.tar.xz" | sha256sum -c || exit 1
           tar xf pygobject.tar.xz
 
       - name: Install build dependencies
@@ -84,6 +85,7 @@ jobs:
           cd pygobject-%PYGOBJECT_VERSION%
           %PYTHON_EXE% -m pip install "D:\a\bbgtkwin\bbgtkwin\pygobject-${{ env.PYGOBJECT_VERSION }}\dist\pygobject-${{ env.PYGOBJECT_VERSION }}-cp311-cp311-win32.whl"
           (echo "import gi" | %PYTHON_EXE%) && echo "gi import succeeded." || echo "gi import failed."
+          %PYTHON_EXE% ${{ github.workspace }}/show_versions.py
         shell: cmd
 
       - name: Upload wheel
