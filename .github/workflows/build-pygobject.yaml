@@ -72,7 +72,7 @@ jobs:
           CL: '-I${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\include\python3.11'
         run: |
           cd pygobject-%PYGOBJECT_VERSION%
-          curl https://gist.githubusercontent.com/az0/d252f29d68e705d6b65da123f1678fa7/raw/1ef10cbaf3f93a4b104742740e4d1560b2b3959d/gi.patch | patch -p1
+          patch -p1 < ${{ github.workspace }}\gi.patch
           echo copying python311.lib as a workaround
           mkdir "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"
           copy "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\lib\python311.lib" "${{ github.workspace }}\gtk${{ env.GTK_VERSION }}\vcpkg_installed\x86-windows\tools\python3\libs"

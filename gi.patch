@@ -1,0 +1,56 @@
+diff --git a/gi/pygenum.c b/gi/pygenum.c
+index 66c872e4..ea472f79 100644
+--- a/gi/pygenum.c
++++ b/gi/pygenum.c
+@@ -81,7 +81,7 @@ pyg_enum_from_gtype (GType gtype, int value)
+ static void
+ add_value (PyObject *dict, const char *value_nick, int value)
+ {
+-    g_autofree char *upper = g_ascii_strup(value_nick, -1);
++    char *upper = g_ascii_strup(value_nick, -1);
+     char *c;
+ 
+     for (c = upper; *c != '\0'; c++) {
+@@ -89,9 +89,13 @@ add_value (PyObject *dict, const char *value_nick, int value)
+     }
+ 
+     /* skip if the name already exists in the dictionary */
+-    if (PyDict_GetItemString (dict, upper) != NULL) return;
++    if (PyDict_GetItemString (dict, upper) != NULL)
++        goto cleanup;
+ 
+     PyDict_SetItemString (dict, upper, PyLong_FromLong (value));
++
++cleanup:
++    g_free (upper);
+ }
+ 
+ PyObject *
+diff --git a/gi/pygflags.c b/gi/pygflags.c
+index b6ee371f..1b070c0b 100644
+--- a/gi/pygflags.c
++++ b/gi/pygflags.c
+@@ -80,7 +80,7 @@ pyg_flags_from_gtype (GType gtype, guint value)
+ static void
+ add_value (PyObject *dict, const char *value_nick, unsigned int value)
+ {
+-    g_autofree char *upper = g_ascii_strup(value_nick, -1);
++    char *upper = g_ascii_strup(value_nick, -1);
+     char *c;
+ 
+     for (c = upper; *c != '\0'; c++) {
+@@ -88,9 +88,13 @@ add_value (PyObject *dict, const char *value_nick, unsigned int value)
+     }
+ 
+     /* skip if the name already exists in the dictionary */
+-    if (PyDict_GetItemString (dict, upper) != NULL) return;
++    if (PyDict_GetItemString (dict, upper) != NULL)
++        goto cleanup;
+ 
+     PyDict_SetItemString (dict, upper, PyLong_FromUnsignedLong (value));
++
++cleanup:
++    g_free (upper);
+ }
+ 
+ PyObject *
