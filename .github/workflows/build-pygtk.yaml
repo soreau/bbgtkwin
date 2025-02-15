@@ -55,12 +55,12 @@ jobs:
       run: |
         vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\tools\python3\python.exe -V
         vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\tools\python3\python.exe ${{ github.workspace }}/show_versions.py
-        # pip is not installed
+        :: pip is not installed
     
     - name: Prepare for packing
       shell: cmd
       run: |
-        # The empty file keeps all directory levels in the artifact
+        :: The empty file keeps all directory levels in the artifact
         type nul > vcpkg_installed\empty
         echo "Size before cleanup:"
         dir /s vcpkg_installed | findstr "File(s)"
