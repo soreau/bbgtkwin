@@ -66,6 +66,7 @@ jobs:
       shell: cmd
       run: |
         rmdir /s /q vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\debug
+        rmdir /s /q vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\x64
         7z a -tzip -mx=9 gtk${{ env.GTK_VERSION }}-${{ env.VCPKG_DEFAULT_TRIPLET }}.zip vcpkg_installed
         certutil -hashfile gtk${{ env.GTK_VERSION }}-${{ env.VCPKG_DEFAULT_TRIPLET }}.zip SHA256
 
