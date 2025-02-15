@@ -36,7 +36,7 @@ jobs:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: build.yaml
           name: gtk${{ env.GTK_VERSION }}-windows
-          repo: az0/bbgtkwin
+          repo: bleachbit/pygtkwin
           path: gtk${{ env.GTK_VERSION }}
 
       - name: Extract GTK files
