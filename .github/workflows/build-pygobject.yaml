@@ -84,11 +84,11 @@ jobs:
         env:
           PATH: ${{ env.PATH }};${{ env.PYSCRIPT_DIR }}
         run: |
-          if not exist "%PYGOBJECT_WHL%" (
-            echo Error: PYGOBJECT_WHL does not exist.
+          if not exist "${{ env.PYGOBJECT_WHL }}" (
+            echo Error: ${{ env.PYGOBJECT_WHL }} does not exist.
             exit /b 1
           )
-          %PYTHON_EXE% -m pip install "${PYGOBJECT_WHL}"
+          %PYTHON_EXE% -m pip install "${{ env.PYGOBJECT_WHL }}"
           (echo "import gi" | %PYTHON_EXE%) && echo "gi import succeeded." || echo "gi import failed."
           %PYTHON_EXE% ${{ github.workspace }}/show_versions.py
         shell: cmd
