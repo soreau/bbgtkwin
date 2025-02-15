@@ -16,12 +16,13 @@ jobs:
     runs-on: windows-latest
 
     env:
-      PYGOBJECT_VERSION: 3.51.0
       GTK_VERSION: 3.24
-      VCPKG_DEFAULT_TRIPLET: 'x86-windows'
-      PYTHON_PATH: '${{ github.workspace }}\gtk3.24\vcpkg_installed\x86-windows\tools\python3'
-      PYTHON_EXE: '${{ github.workspace }}\gtk3.24\vcpkg_installed\x86-windows\tools\python3\python.exe'
+      PYGOBJECT_WHL: '${{ github.workspace }}\pygobject-3.51.0\dist\pygobject-3.51.0-cp311-cp311-win32.whl'
+      PYGOBJECT_VERSION: 3.51.0
       PYSCRIPT_DIR: '${{ github.workspace }}\gtk3.24\vcpkg_installed\x86-windows\tools\python3\scripts'
+      PYTHON_EXE: '${{ github.workspace }}\gtk3.24\vcpkg_installed\x86-windows\tools\python3\python.exe'
+      PYTHON_PATH: '${{ github.workspace }}\gtk3.24\vcpkg_installed\x86-windows\tools\python3'
+      VCPKG_DEFAULT_TRIPLET: 'x86-windows'
 
     steps:
       - uses: actions/checkout@v3
@@ -83,8 +84,11 @@ jobs:
         env:
           PATH: ${{ env.PATH }};${{ env.PYSCRIPT_DIR }}
         run: |
-          cd pygobject-%PYGOBJECT_VERSION%
-          %PYTHON_EXE% -m pip install "D:\a\bbgtkwin\bbgtkwin\pygobject-${{ env.PYGOBJECT_VERSION }}\dist\pygobject-${{ env.PYGOBJECT_VERSION }}-cp311-cp311-win32.whl"
+          if not exist "%PYGOBJECT_WHL%" (
+            echo Error: PYGOBJECT_WHL does not exist.
+            exit /b 1
+          )
+          %PYTHON_EXE% -m pip install "${PYGOBJECT_WHL}"
           (echo "import gi" | %PYTHON_EXE%) && echo "gi import succeeded." || echo "gi import failed."
           %PYTHON_EXE% ${{ github.workspace }}/show_versions.py
         shell: cmd
@@ -93,13 +97,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pygobject-wheel
-          path: 'D:\a\bbgtkwin\bbgtkwin\pygobject-${{ env.PYGOBJECT_VERSION }}\dist\*.whl'
+          path: ${{ env.PYGOBJECT_WHL}}
 
       # Release when a tag is pushed
       - name: Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: 'D:\a\bbgtkwin\bbgtkwin\pygobject-${{ env.PYGOBJECT_VERSION }}\dist\*.whl'
+          files: ${{ env.PYGOBJECT_WHL}}
           generate_release_notes: false
           fail_on_unmatched_files: true
