@@ -11,10 +11,11 @@ def print_versions():
         import gi
         gi.require_version('Gtk', '3.0')
         from gi.repository import Gtk
+    except (ImportError, ValueError) as e:
+        print(f"GTK/PyGObject not available: {e}")
+    else:
         print(f"Gtk version: {Gtk.get_major_version()}.{Gtk.get_minor_version()}.{Gtk.get_micro_version()}")
         print(f"PyGObject version: {gi.__version__}")
-    except (ImportError, ValueError) as e:
-        print("GTK/PyGObject not available")
 
 if __name__ == "__main__":
     print_versions()
