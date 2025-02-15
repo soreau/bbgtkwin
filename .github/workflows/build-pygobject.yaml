@@ -47,6 +47,10 @@ jobs:
           cd gtk${{ env.GTK_VERSION }}
           certutil -hashfile gtk${{ env.GTK_VERSION }}-x86-windows.zip SHA256
           7z x gtk${{ env.GTK_VERSION }}-x86-windows.zip
+          if not exist "%PYTHON_EXE%" (
+            echo Error: Python executable not found at %PYTHON_EXE%
+            exit /b 1
+          )
 
       - name: Download PyGObject source
         shell: bash
