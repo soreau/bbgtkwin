@@ -56,17 +56,26 @@ jobs:
         vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\tools\python3\python.exe -m pip --version
         vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\tools\python3\python.exe ${{ github.workspace }}/show_versions.py
 
-    # So the artifact keeps all directory levels.
-    - name: Create empty file
+    
+    - name: Prepare for packing
       shell: cmd
       run: |
+        # The empty file keeps all directory levels in the artifact
         type nul > vcpkg_installed\empty
+        echo "Size before cleanup:"
+        dir /s vcpkg_installed | findstr "File(s)"
+        rmdir /s /q vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\debug
+        rmdir /s /q vcpkg_installed\info
+        rmdir /s /q vcpkg_installed\x64-windows
+        del vcpkg_installed\*.json
+        del vcpkg_installed\status
+        del vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\bin\*.pdb
+        echo "\nSize after cleanup:"
+        dir /s vcpkg_installed | findstr "File(s)"
 
     - name: Package the build
       shell: cmd
       run: |
-        rmdir /s /q vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\debug
-        rmdir /s /q vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\x64
         7z a -tzip -mx=9 gtk${{ env.GTK_VERSION }}-${{ env.VCPKG_DEFAULT_TRIPLET }}.zip vcpkg_installed
         certutil -hashfile gtk${{ env.GTK_VERSION }}-${{ env.VCPKG_DEFAULT_TRIPLET }}.zip SHA256
 
