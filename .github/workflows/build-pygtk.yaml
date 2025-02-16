@@ -82,6 +82,7 @@ jobs:
         name: gtk${{ env.GTK_VERSION }}-${{ env.VCPKG_DEFAULT_TRIPLET }}
         path: vcpkg_installed
         if-no-files-found: error
+        compression-level: 9 # maximum
 
     # Create GitHub Release when a tag is pushed
     - name: Create Release
