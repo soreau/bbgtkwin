@@ -58,20 +58,15 @@ jobs:
         :: pip is not installed
     
     - name: Prepare for packing
-      shell: cmd
+      shell: pwsh
       run: |
-        :: The empty file keeps all directory levels in the artifact
-        type nul > vcpkg_installed\empty
-        echo "Size before cleanup:"
-        dir /s vcpkg_installed | findstr "File(s)"
-        rmdir /s /q vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\debug
-        rmdir /s /q vcpkg_installed\info
-        rmdir /s /q vcpkg_installed\x64-windows
-        del vcpkg_installed\*.json
-        del vcpkg_installed\status
-        del vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\bin\*.pdb
-        echo "\nSize after cleanup:"
-        dir /s vcpkg_installed | findstr "File(s)"
+        Set-Content -Path "vcpkg_installed\placeholder.txt" -Value "This file makes upload-artifact keep all directory levels"
+        Write-Host "Size before cleanup:"
+        Get-ChildItem -Recurse vcpkg_installed | Measure-Object -Property Length -Sum |Select-Object @{Name = 'Sum'; Expression = {$_.Sum -as [string] -replace '\B(?=(\d{3})+(?!\d))', ','}}
+        Remove-Item -Recurse -Force "vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\debug", "vcpkg_installed\x64-windows"
+        Remove-Item "vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\bin\*.pdb"
+        Write-Host "Size after cleanup:"
+        Get-ChildItem -Recurse vcpkg_installed | Measure-Object -Property Length -Sum |Select-Object @{Name = 'Sum'; Expression = {$_.Sum -as [string] -replace '\B(?=(\d{3})+(?!\d))', ','}}
 
     - name: Package the build
       shell: cmd
