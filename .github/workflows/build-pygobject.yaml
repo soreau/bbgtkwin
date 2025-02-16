@@ -96,8 +96,7 @@ jobs:
           :: the girepository DLL is in the bin directory
           set "PATH=%PATH%;%GITHUB_WORKSPACE%\gtk3.24\vcpkg_installed\x86-windows\bin"
           echo %PATH%
-          dir ${{ github.workspace }}\gtk3.24\vcpkg_installed\x86-windows\bin
-          dir /s /b | find "girepository"
+          dir ${{ github.workspace }}\gtk3.24\vcpkg_installed\x86-windows\bin\gi*.dll
           %PYTHON_EXE% -m pip install "${{ env.PYGOBJECT_WHL }}"
           (echo "import gi" | %PYTHON_EXE%) && echo "gi import succeeded." || echo "gi import failed."
           %PYTHON_EXE% ${{ github.workspace }}/show_versions.py
