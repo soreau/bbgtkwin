@@ -17,15 +17,13 @@ jobs:
     env:
       VCPKG_COMMIT: '058088532e33f23ac1ad31e32ad0bb1ab8e32195'
       VCPKG_DEFAULT_TRIPLET: 'x86-windows'
-      #VCPKG_INSTALLED_DIR: ${{ github.workspace }}/vcpkg/installed
-      VCPKG_INSTALLED_DIR: ${{ github.workspace }}\vcpkg\downloads
       GTK_VERSION: 3.24
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up MSVC++ 2015
+    - name: Set up MSVC
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: x86
@@ -34,6 +32,7 @@ jobs:
       id: vcpkg
       uses: johnwason/vcpkg-action@v6
       with:
+        revision: ${{ env.VCPKG_COMMIT }}
         manifest-dir: ${{ github.workspace }}
         triplet: ${{ env.VCPKG_DEFAULT_TRIPLET }}
         token: ${{ github.token }}
