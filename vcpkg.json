@@ -6,6 +6,7 @@
         "introspection"
       ]
     },
-    "librsvg"
+    "librsvg",
+    "pkgconf"
   ]
 }

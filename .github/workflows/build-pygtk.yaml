@@ -1,4 +1,4 @@
-name: Build and Package Python and GTK
+name: Build and Package PyGTK
 
 on:
   push:
@@ -10,73 +10,147 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+env:
+  VCPKG_TRIPLET: x86-windows
+  GTK_VERSION: 3.24
+
 jobs:
-  build:
+  vcpkg-build:
+    name: Build python and PyGTK
     runs-on: windows-latest
 
     env:
       VCPKG_COMMIT: '058088532e33f23ac1ad31e32ad0bb1ab8e32195'
-      VCPKG_DEFAULT_TRIPLET: 'x86-windows'
-      GTK_VERSION: 3.24
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up MSVC
-      uses: ilammy/msvc-dev-cmd@v1
-      with:
-        arch: x86
+      - name: Set up pygtkwin environment
+        uses: ./actions/pygtkwin-env
 
-    - name: vcpkg build
-      id: vcpkg
-      uses: johnwason/vcpkg-action@v6
-      with:
-        revision: ${{ env.VCPKG_COMMIT }}
-        manifest-dir: ${{ github.workspace }}
-        triplet: ${{ env.VCPKG_DEFAULT_TRIPLET }}
-        token: ${{ github.token }}
-        github-binarycache: true
-  
-    - name: Prepare for packing
-      shell: pwsh
-      run: |
-        Copy-Item -Path "vcpkg\installed" -Destination "vcpkg_installed" -Recurse
-        Set-Content -Path "vcpkg_installed\placeholder.txt" -Value "This file makes upload-artifact keep all directory levels"
-        $sizeBeforeCleanup = Get-ChildItem -Recurse vcpkg_installed | Measure-Object -Property Length -Sum
-        Remove-Item -Recurse -Force "vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\debug", "vcpkg_installed\x64-windows"
-        Remove-Item "vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\bin\*.pdb"
-        $sizeAfterCleanup = Get-ChildItem -Recurse vcpkg_installed | Measure-Object -Property Length -Sum
-        Write-Host "Size before cleanup: $([string]::Format("{0:N0}", $sizeBeforeCleanup.Sum))"
-        Write-Host "Size after cleanup: $([string]::Format("{0:N0}", $sizeAfterCleanup.Sum))"
+      - name: vcpkg build
+        uses: johnwason/vcpkg-action@v6
+        with:
+          revision: ${{ env.VCPKG_COMMIT }}
+          manifest-dir: ${{ github.workspace }}
+          triplet: ${{ env.VCPKG_TRIPLET }}
+          token: ${{ github.token }}
+          github-binarycache: true
 
-    - name: Test the build
-      shell: cmd
-      run: |
-        vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\tools\python3\python.exe -V
-        vcpkg_installed\${{ env.VCPKG_DEFAULT_TRIPLET }}\tools\python3\python.exe ${{ github.workspace }}/show_versions.py
-        :: pip is not installed
+      - name: Prepare for packing
+        shell: bash
+        run: |
+          cp -a vcpkg/installed vcpkg_installed
+          echo "Size before cleanup: $(du -sh vcpkg_installed)"
+          rm -rf vcpkg_installed/${{ env.VCPKG_TRIPLET }}/debug vcpkg_installed/${{ env.VCPKG_TRIPLET }}/bin/*.pdb
+          rm -rf vcpkg_installed/vcpkg vcpkg_installed/x64-windows
+          echo "Size after cleanup: $(du -sh vcpkg_installed)"
 
-    - name: Package the build
-      shell: cmd
-      run: |
-        7z a -tzip -mx=9 gtk${{ env.GTK_VERSION }}-${{ env.VCPKG_DEFAULT_TRIPLET }}.zip vcpkg_installed
-        certutil -hashfile gtk${{ env.GTK_VERSION }}-${{ env.VCPKG_DEFAULT_TRIPLET }}.zip SHA256
+      - name: Test the build
+        shell: cmd
+        run: |
+          ${{ env.PYTHON }} -V
+          ${{ env.PYTHON }} show_versions.py
+          :: pip is not installed
 
-    # This action cannot upload the existing zip file: it always makes archives
-    # the path into a zip file.
-    - name: Upload the build artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: gtk${{ env.GTK_VERSION }}-${{ env.VCPKG_DEFAULT_TRIPLET }}
-        path: vcpkg_installed
-        if-no-files-found: error
-        compression-level: 9 # maximum
+      - name: Upload the build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.GTK_BUILD_NAME }}
+          path: vcpkg_installed
+          if-no-files-found: error
+          compression-level: 9 # maximum
 
-    # Create GitHub Release when a tag is pushed
-    - name: Create Release
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v2
-      with:
-        files: gtk${{ env.GTK_VERSION }}-${{ env.VCPKG_DEFAULT_TRIPLET }}.zip
-        generate_release_notes: true
+      # Create GitHub Release when a tag is pushed
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.GTK_BUILD_NAME }}.zip
+          generate_release_notes: true
+
+  pygobject-build:
+    name: Build pygobject
+    runs-on: windows-latest
+    needs: vcpkg-build
+
+    env:
+      PYGOBJECT_WHL: '${{ github.workspace }}\pygobject-3.51.0\dist\pygobject-3.51.0-cp311-cp311-win32.whl'
+      PYGOBJECT_VERSION: 3.51.0
+      PYGOBJECT_SHA256: 5d8ec64b034a29a14c3739541436a07ea0de83c8a394c6e5ecaa9e2e5b7b4e72
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up pygtkwin environment
+        uses: ./actions/pygtkwin-env
+
+      - name: Download GTK artifacts
+        uses: dawidd6/action-download-artifact@v4
+        with:
+          name: ${{ env.GTK_BUILD_NAME }}
+          path: vcpkg_installed
+          run_id: ${{ github.run_id }}
+
+      - name: Download PyGObject source
+        shell: bash
+        run: |
+          curl -L https://download.gnome.org/sources/pygobject/3.51/pygobject-${{ env.PYGOBJECT_VERSION }}.tar.xz -o pygobject.tar.xz
+          certutil -hashfile pygobject.tar.xz SHA256
+          echo "${{ env.PYGOBJECT_SHA256 }} pygobject.tar.xz" | sha256sum -c || exit 1
+          tar xf pygobject.tar.xz
+
+      - name: Install build dependencies
+        shell: cmd
+        run: |
+          ${{ env.PYTHON }} -m ensurepip --upgrade
+          ${{ env.PYTHON }} -m pip install --upgrade pip
+          ${{ env.PYTHON }} -m pip install -r requirements.txt
+
+      - name: Build wheel
+        shell: cmd
+        env:
+          PKG_CONFIG: ${{ env.VCPKG_DIR }}\tools\pkgconf\pkgconf
+          PKG_CONFIG_PATH: ${{ env.VCPKG_DIR }}\lib\pkgconfig
+        run: |
+          echo Copying python311.lib as a workaround
+          mkdir "${{ env.PYTHON_DIR }}\libs"
+          copy "${{ env.VCPKG_DIR }}\lib\python311.lib" "${{ env.PYTHON_DIR }}\libs"
+
+          cd pygobject-%PYGOBJECT_VERSION%
+          patch -p1 < ${{ github.workspace }}\gi.patch
+          ${{ env.PYTHON }} -m build --no-isolation --wheel
+          dir /b /s *.whl
+
+      - name: Test wheel
+        shell: cmd
+        run: |
+          if not exist "${{ env.PYGOBJECT_WHL }}" (
+            echo Error: ${{ env.PYGOBJECT_WHL }} does not exist.
+            exit /b 1
+          )
+          ${{ env.PYTHON }} -m pip install "${{ env.PYGOBJECT_WHL }}"
+
+          robocopy /MIR /COPYALL ${{ env.VCPKG_DIR }}\lib\girepository-1.0 ${{ env.PYTHON_DIR }}\lib\girepository-1.0
+          set PATH=%PATH%;${{ env.VCPKG_DIR }}\bin
+          ${{ env.PYTHON }} show_versions.py -r -a ${{ env.VCPKG_DIR }}\bin
+
+      - name: Upload wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: pygobject-wheel
+          path: ${{ env.PYGOBJECT_WHL}}
+
+      # Release when a tag is pushed
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.PYGOBJECT_WHL}}
+          generate_release_notes: false
+          fail_on_unmatched_files: true
