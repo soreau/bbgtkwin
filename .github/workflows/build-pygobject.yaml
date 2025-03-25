@@ -2,13 +2,12 @@ name: Build PyGObject Wheel
 
 on:
   push:
-    branches:
-      - main
-      - dev
-    tags:
-      - 'v*'
   pull_request:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Build and Package Python and GTK"]
+     types:
+       - completed
 
 jobs:
   build_wheels:
@@ -34,17 +33,15 @@ jobs:
       - name: Download GTK artifacts
         uses: dawidd6/action-download-artifact@v2
         with:
-          github_token: ${{secrets.GITHUB_TOKEN}}
-          workflow: build.yaml
-          name: gtk${{ env.GTK_VERSION }}-windows
-          repo: bleachbit/pygtkwin
+          workflow: build-pygtk.yaml
+          name: gtk${{ env.GTK_VERSION }}-${{ env.VCPKG_DEFAULT_TRIPLET }}
           path: gtk${{ env.GTK_VERSION }}
 
       - name: Extract GTK files
         shell: cmd
         run: |
           cd gtk${{ env.GTK_VERSION }}
-          certutil -hashfile gtk${{ env.GTK_VERSION }}-x86-windows.zip SHA256
+          certutil -hashfile gtk${{ env.GTK_VERSION }}-${{ env.VCPKG_DEFAULT_TRIPLET }}.zip SHA256
           7z x gtk${{ env.GTK_VERSION }}-x86-windows.zip
           if not exist "%PYTHON_EXE%" (
             echo Error: Python executable not found at %PYTHON_EXE%
