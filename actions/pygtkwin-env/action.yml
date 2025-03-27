@@ -23,7 +23,7 @@ runs:
 
     - name: Set PYTHON
       shell: bash
-      run: echo 'PYTHON=${{ env.PYTHON_DIR }}\python' >>$GITHUB_ENV
+      run: echo 'PYTHON=${{ env.PYTHON_DIR }}\python.exe' >>$GITHUB_ENV
 
     - name: Set PATH
       shell: bash

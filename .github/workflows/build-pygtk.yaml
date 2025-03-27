@@ -50,6 +50,12 @@ jobs:
           rm -rf vcpkg_installed/vcpkg vcpkg_installed/x64-windows
           echo "Size after cleanup: $(du -sh vcpkg_installed)"
 
+      - name: Package the build
+        shell: cmd
+        run: |
+          7z a -tzip -mx=9 ${{ env.GTK_BUILD_NAME }}.zip vcpkg_installed
+          certutil -hashfile ${{ env.GTK_BUILD_NAME }}.zip SHA256
+
       - name: Test the build
         shell: cmd
         run: |
@@ -61,9 +67,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.GTK_BUILD_NAME }}
-          path: vcpkg_installed
+          path: ${{ env.GTK_BUILD_NAME }}.zip
           if-no-files-found: error
-          compression-level: 9 # maximum
 
       # Create GitHub Release when a tag is pushed
       - name: Create Release
@@ -79,7 +84,6 @@ jobs:
     needs: vcpkg-build
 
     env:
-      PYGOBJECT_WHL: '${{ github.workspace }}\pygobject-3.51.0\dist\pygobject-3.51.0-cp311-cp311-win32.whl'
       PYGOBJECT_VERSION: 3.51.0
       PYGOBJECT_SHA256: 5d8ec64b034a29a14c3739541436a07ea0de83c8a394c6e5ecaa9e2e5b7b4e72
 
@@ -90,14 +94,23 @@ jobs:
       - name: Set up pygtkwin environment
         uses: ./actions/pygtkwin-env
 
-      - name: Download GTK artifacts
+      - name: Download PyGTK artifacts
         uses: dawidd6/action-download-artifact@v4
         with:
           name: ${{ env.GTK_BUILD_NAME }}
-          path: vcpkg_installed
           run_id: ${{ github.run_id }}
 
-      - name: Download PyGObject source
+      - name: Extract PyGTK files
+        shell: cmd
+        run: |
+          certutil -hashfile ${{ env.GTK_BUILD_NAME }}.zip SHA256
+          7z x ${{ env.GTK_BUILD_NAME }}.zip
+          if not exist "${{ env.PYTHON }}" (
+            echo Error: Python executable not found at ${{ env.PYTHON }}
+            exit /b 1
+          )
+
+      - name: Download and extract PyGObject source
         shell: bash
         run: |
           curl -L https://download.gnome.org/sources/pygobject/3.51/pygobject-${{ env.PYGOBJECT_VERSION }}.tar.xz -o pygobject.tar.xz
@@ -122,10 +135,13 @@ jobs:
           mkdir "${{ env.PYTHON_DIR }}\libs"
           copy "${{ env.VCPKG_DIR }}\lib\python311.lib" "${{ env.PYTHON_DIR }}\libs"
 
-          cd pygobject-%PYGOBJECT_VERSION%
+          for /F "usebackq" %%i in (`${{ env.PKG_CONFIG }} --cflags python-3.11`) do set CL=%%i
+          cd pygobject-${{ env.PYGOBJECT_VERSION }}
           patch -p1 < ${{ github.workspace }}\gi.patch
-          ${{ env.PYTHON }} -m build --no-isolation --wheel
+          ${{ env.PYTHON }} -m build --wheel
           dir /b /s *.whl
+
+          echo PYGOBJECT_WHL=${{ github.workspace }}\pygobject-${{ env.PYGOBJECT_VERSION }}\dist\pygobject-${{ env.PYGOBJECT_VERSION }}-cp311-cp311-win32.whl>>%GITHUB_ENV%
 
       - name: Test wheel
         shell: cmd
@@ -138,13 +154,14 @@ jobs:
 
           robocopy /MIR /COPYALL ${{ env.VCPKG_DIR }}\lib\girepository-1.0 ${{ env.PYTHON_DIR }}\lib\girepository-1.0
           set PATH=%PATH%;${{ env.VCPKG_DIR }}\bin
-          ${{ env.PYTHON }} show_versions.py -r -a ${{ env.VCPKG_DIR }}\bin
+          ${{ env.PYTHON }} show_versions.py --required --dll-directory=${{ env.VCPKG_DIR }}\bin
 
       - name: Upload wheel
         uses: actions/upload-artifact@v4
         with:
           name: pygobject-wheel
           path: ${{ env.PYGOBJECT_WHL}}
+          if-no-files-found: error
 
       # Release when a tag is pushed
       - name: Release
