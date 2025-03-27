@@ -1,0 +1,30 @@
+name: pygtkwin environemnt
+description: |
+  Initializes pygtkwin environment
+runs:
+  using: composite
+  steps:
+    - name: Set up MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x86
+
+    - name: Set GTK_BUILD_NAME
+      shell: bash
+      run: echo 'GTK_BUILD_NAME=gtk${{ env.GTK_VERSION }}-${{ env.VCPKG_TRIPLET }}' >>$GITHUB_ENV
+
+    - name: Set VCPKG_DIR
+      shell: bash
+      run: echo 'VCPKG_DIR=${{ github.workspace }}\vcpkg_installed\${{ env.VCPKG_TRIPLET }}' >>$GITHUB_ENV
+
+    - name: Set PYTHON_DIR
+      shell: bash
+      run: echo 'PYTHON_DIR=${{ env.VCPKG_DIR }}\tools\python3' >>$GITHUB_ENV
+
+    - name: Set PYTHON
+      shell: bash
+      run: echo 'PYTHON=${{ env.PYTHON_DIR }}\python' >>$GITHUB_ENV
+
+    - name: Set PATH
+      shell: bash
+      run: echo 'PATH=${{ env.PYTHON_DIR }};${{ env.PYTHON_DIR }}\Scripts;${{ env.PATH }}' >>$GITHUB_ENV
