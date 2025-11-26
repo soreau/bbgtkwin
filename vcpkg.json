@@ -7,6 +7,10 @@
       ]
     },
     {
+      "name": "harfbuzz",
+      "version>=": "11.3.2"
+    },
+    {
       "name": "pango",
       "version>=": "1.56.4"
     },
