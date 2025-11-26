@@ -9,7 +9,7 @@
     {
       "name": "pango",
       "version >= ": "1.56.4"
-    }
+    },
     "librsvg",
     "pkgconf"
   ]
