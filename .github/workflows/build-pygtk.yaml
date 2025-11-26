@@ -15,7 +15,6 @@ concurrency:
 
 env:
   VCPKG_TRIPLET: x86-windows
-  PANGO_VERSION: 1.56.4
   GTK_VERSION: 3.24
 
 jobs:
