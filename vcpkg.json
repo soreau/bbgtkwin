@@ -12,7 +12,7 @@
     },
     {
       "name": "harfbuzz",
-      "version>=": "11.3.2"
+      "version>=": "12.2.0"
     },
     {
       "name": "gobject-introspection",
