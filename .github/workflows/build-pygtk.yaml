@@ -22,6 +22,9 @@ jobs:
     name: Build python and PyGTK
     runs-on: windows-latest
 
+    env:
+      VCPKG_COMMIT: '294b9d097e8486770e922890d6a4b757b7dca5e3'
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
