@@ -7,6 +7,10 @@
       ]
     },
     {
+      "name": "cairo",
+      "version>=": "1.18.4"
+    },
+    {
       "name": "harfbuzz",
       "version>=": "11.3.2"
     },
