@@ -15,6 +15,10 @@
       "version>=": "11.3.2"
     },
     {
+      "name": "gobject-introspection",
+      "version>=": "1.82.0"
+    },
+    {
       "name": "pango",
       "version>=": "1.56.4"
     },
