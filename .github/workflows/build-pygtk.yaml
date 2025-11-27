@@ -94,8 +94,8 @@ jobs:
     needs: vcpkg-build
 
     env:
-      PYGOBJECT_VERSION: 3.51.0
-      PYGOBJECT_SHA256: 5d8ec64b034a29a14c3739541436a07ea0de83c8a394c6e5ecaa9e2e5b7b4e72
+      PYGOBJECT_VERSION: 3.55.0
+      PYGOBJECT_SHA256: 8857ff725922a3b2c42d9f11c1bb609ccc25f319a2c802190a1c09ad267442c7
 
     steps:
       - name: Checkout code
@@ -123,10 +123,10 @@ jobs:
       - name: Download and extract PyGObject source
         shell: bash
         run: |
-          curl -L https://download.gnome.org/sources/pygobject/3.51/pygobject-${{ env.PYGOBJECT_VERSION }}.tar.xz -o pygobject.tar.xz
-          certutil -hashfile pygobject.tar.xz SHA256
-          echo "${{ env.PYGOBJECT_SHA256 }} pygobject.tar.xz" | sha256sum -c || exit 1
-          tar xf pygobject.tar.xz
+          curl -L https://download.gnome.org/sources/pygobject/3.55/pygobject-${{ env.PYGOBJECT_VERSION }}.tar.gz -o pygobject.tar.gz
+          certutil -hashfile pygobject.tar.gz SHA256
+          echo "${{ env.PYGOBJECT_SHA256 }} pygobject.tar.gz" | sha256sum -c || exit 1
+          tar xf pygobject.tar.gz
 
       - name: Install build dependencies
         shell: cmd
