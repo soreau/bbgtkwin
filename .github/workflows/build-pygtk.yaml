@@ -39,9 +39,10 @@ jobs:
           cd ./vcpkg
           git checkout ${{ env.VCPKG_COMMIT }}
           ./bootstrap-vcpkg.bat
+          ./vcpkg update
           ./vcpkg install pkgconf:x86-windows
-          ./vcpkg install gdk-pixbuf:x86-windows --head
-          ./vcpkg install atk:x86-windows --head
+          ./vcpkg install gdk-pixbuf:x86-windows
+          ./vcpkg install atk:x86-windows
           ./vcpkg install python3:x86-windows
           python -m ensurepip --upgrade
           python -m pip install virtualenv
