@@ -143,7 +143,7 @@ jobs:
         run: |
           echo Copying python312.lib as a workaround
           mkdir "${{ env.PYTHON_DIR }}\libs"
-          copy "${{ env.VCPKG_DIR }}\lib\python312.lib" "${{ env.PYTHON_DIR }}\libs"
+          copy "${{ env.VCPKG_DIR }}\bin\python312.lib" "${{ env.PYTHON_DIR }}\libs"
 
           for /F "usebackq" %%i in (`${{ env.PKG_CONFIG }} --cflags python-3.12`) do set CL=%%i
           cd pygobject-${{ env.PYGOBJECT_VERSION }}
