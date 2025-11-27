@@ -1,21 +1,23 @@
 diff --git a/ports/atk/portfile.cmake b/ports/atk/portfile.cmake
-index 807f5674ce..a2a6ecbd70 100644
+index 807f5674ce..8c303b31c1 100644
 --- a/ports/atk/portfile.cmake
 +++ b/ports/atk/portfile.cmake
-@@ -1,9 +1,7 @@
+@@ -1,10 +1,7 @@
 -vcpkg_from_gitlab(
 -    GITLAB_URL https://gitlab.gnome.org/
 +vcpkg_from_git(
 +    URL https://gitlab.gnome.org/Archive/atk.git
      OUT_SOURCE_PATH SOURCE_PATH
 -    REPO GNOME/atk
-     REF "${VERSION}"
+-    REF "${VERSION}"
 -    HEAD_REF master
-     SHA512 f31951ecbdace6a18fb9f772616137cb8732163b37448fef4daf1af60ba8479c94d498dcdaf4880468c80012c77a446da585926a99704a9a940b80e546080cf3
+-    SHA512 f31951ecbdace6a18fb9f772616137cb8732163b37448fef4daf1af60ba8479c94d498dcdaf4880468c80012c77a446da585926a99704a9a940b80e546080cf3
++    HEAD_REF "${VERSION}"
  )
  
+ if("introspection" IN_LIST FEATURES)
 diff --git a/ports/gdk-pixbuf/portfile.cmake b/ports/gdk-pixbuf/portfile.cmake
-index 82d534b447..880b94bbae 100644
+index 82d534b447..32ffa34c37 100644
 --- a/ports/gdk-pixbuf/portfile.cmake
 +++ b/ports/gdk-pixbuf/portfile.cmake
 @@ -1,10 +1,7 @@
@@ -25,9 +27,10 @@ index 82d534b447..880b94bbae 100644
 +    URL https://gitlab.gnome.org/GNOME/gdk-pixbuf.git
      OUT_SOURCE_PATH SOURCE_PATH
 -    REPO GNOME/gdk-pixbuf
-     REF "${VERSION}"
+-    REF "${VERSION}"
 -    SHA512 f95c92974ed6efac9845790ef5c4ed74dd6e28b182ea3732013c46b016166e92f8bc10c1994358d79ff53e988c615c43cb1a2130c6ef531ef9d84c2fdcc87e52
 -    HEAD_REF master
++    HEAD_REF "${VERSION}"
      PATCHES
          fix_build_error_windows.patch
          loaders-cache.patch
