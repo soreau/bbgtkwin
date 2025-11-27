@@ -141,17 +141,17 @@ jobs:
           PKG_CONFIG: ${{ env.VCPKG_DIR }}\tools\pkgconf\pkgconf
           PKG_CONFIG_PATH: ${{ env.VCPKG_DIR }}\lib\pkgconfig
         run: |
-          echo Copying python311.lib as a workaround
+          echo Copying python312.lib as a workaround
           mkdir "${{ env.PYTHON_DIR }}\libs"
-          copy "${{ env.VCPKG_DIR }}\lib\python311.lib" "${{ env.PYTHON_DIR }}\libs"
+          copy "${{ env.VCPKG_DIR }}\lib\python312.lib" "${{ env.PYTHON_DIR }}\libs"
 
-          for /F "usebackq" %%i in (`${{ env.PKG_CONFIG }} --cflags python-3.11`) do set CL=%%i
+          for /F "usebackq" %%i in (`${{ env.PKG_CONFIG }} --cflags python-3.12`) do set CL=%%i
           cd pygobject-${{ env.PYGOBJECT_VERSION }}
           patch -p1 < ${{ github.workspace }}\gi.patch
           ${{ env.PYTHON }} -m build --wheel
           dir /b /s *.whl
 
-          echo PYGOBJECT_WHL=${{ github.workspace }}\pygobject-${{ env.PYGOBJECT_VERSION }}\dist\pygobject-${{ env.PYGOBJECT_VERSION }}-cp311-cp311-win32.whl>>%GITHUB_ENV%
+          echo PYGOBJECT_WHL=${{ github.workspace }}\pygobject-${{ env.PYGOBJECT_VERSION }}\dist\pygobject-${{ env.PYGOBJECT_VERSION }}-cp312-cp312-win32.whl>>%GITHUB_ENV%
 
       - name: Test wheel
         shell: cmd
