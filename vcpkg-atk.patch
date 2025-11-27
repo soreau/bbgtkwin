@@ -1,0 +1,13 @@
+diff --git a/ports/atk/portfile.cmake b/ports/atk/portfile.cmake
+index 807f5674ce..a8e64bb5d4 100644
+--- a/ports/atk/portfile.cmake
++++ b/ports/atk/portfile.cmake
+@@ -4,7 +4,7 @@ vcpkg_from_gitlab(
+     REPO GNOME/atk
+     REF "${VERSION}"
+     HEAD_REF master
+-    SHA512 f31951ecbdace6a18fb9f772616137cb8732163b37448fef4daf1af60ba8479c94d498dcdaf4880468c80012c77a446da585926a99704a9a940b80e546080cf3
++    SHA512 ad3e4b52bcdebdfee0410d537762bb47e3b4738ee8c38c01bcc760209ca18f3f1fd7b009cc795cf3f38ea69be102be35bfad1028691a797df99f6ba0db64989f
+ )
+ 
+ if("introspection" IN_LIST FEATURES)
