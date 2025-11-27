@@ -31,12 +31,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Add GitHub Packages as NuGet source
-        run: |
-          $(vcpkg fetch nuget) sources add -Name github -Source "https://nuget.pkg.github.com/soreau/index.json" -UserName "soreau" -Password "${{ secrets.VCPKG_PAT_TOKEN }}"
-
       - name: Set up pygtkwin environment
         uses: ./actions/pygtkwin-env
+
+      - name: Add GitHub Packages as NuGet source
+        shell: pwsh
+        run: |
+          $(vcpkg fetch nuget) sources add -Name github -Source "https://nuget.pkg.github.com/soreau/index.json" -UserName "soreau" -Password "${{ secrets.VCPKG_PAT_TOKEN }}"
 
       - name: vcpkg build
         shell: pwsh
