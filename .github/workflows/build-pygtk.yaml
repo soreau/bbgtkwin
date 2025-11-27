@@ -45,17 +45,9 @@ jobs:
           $nuget_exe = & "./vcpkg" fetch nuget | Select-Object -Last 1
           & $nuget_exe sources add -Name "GitHub" -Source "https://nuget.pkg.github.com/soreau/index.json" -UserName "soreau" -Password "${{ secrets.VCPKG_PAT_TOKEN }}"
           & $nuget_exe setapikey "${{ secrets.VCPKG_PAT_TOKEN }}" -Source "https://nuget.pkg.github.com/soreau/index.json"
-          ./vcpkg install pkgconf:x86-windows
-          ./vcpkg install gdk-pixbuf:x86-windows
-          ./vcpkg install atk:x86-windows
           ./vcpkg install python3:x86-windows
           python -m ensurepip --upgrade
           python -m pip install virtualenv
-          ./vcpkg install gobject-introspection:x86-windows
-          ./vcpkg install librsvg:x86-windows
-          ./vcpkg install harfbuzz:x86-windows
-          ./vcpkg install cairo:x86-windows
-          ./vcpkg install pango:x86-windows
           ./vcpkg install gtk3:x86-windows
 
       - name: Prepare for packing
