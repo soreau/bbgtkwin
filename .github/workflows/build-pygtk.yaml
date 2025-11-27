@@ -39,7 +39,12 @@ jobs:
           cd ./vcpkg
           git checkout ${{ env.VCPKG_COMMIT }}
           ./bootstrap-vcpkg.bat
-          ./vcpkg install --triplet x86-windows
+          ./vcpkg install pkgconf:x86-windows
+          ./vcpkg install librsvg:x86-windows
+          ./vcpkg install harfbuzz:x86-windows
+          ./vcpkg install cairo:x86-windows
+          ./vcpkg install gobject-introspection:x86-windows
+          ./vcpkg install gtk3:x86-windows
 
       - name: Prepare for packing
         shell: bash
