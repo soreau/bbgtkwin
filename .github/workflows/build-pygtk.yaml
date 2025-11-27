@@ -38,8 +38,8 @@ jobs:
           git clone https://github.com/microsoft/vcpkg.git ./vcpkg
           cd ./vcpkg
           git checkout ${{ env.VCPKG_COMMIT }}
-          & git apply ${{ env.GITHUB_WORKSPACE }}/vcpkg-gdk-pixbuf.patch.patch
-          & git apply ${{ env.GITHUB_WORKSPACE }}/vcpkg-atk.patch.patch
+          & git apply $env:GITHUB_WORKSPACE/vcpkg-gdk-pixbuf.patch.patch
+          & git apply $env:GITHUB_WORKSPACE/vcpkg-atk.patch.patch
           ./bootstrap-vcpkg.bat
           ./vcpkg install pkgconf:x86-windows
           ./vcpkg install python3:x86-windows
