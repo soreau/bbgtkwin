@@ -38,17 +38,14 @@ jobs:
           git clone https://github.com/microsoft/vcpkg.git ./vcpkg
           cd ./vcpkg
           git checkout ${{ env.VCPKG_COMMIT }}
-          git config --global user.email "oreaus@gmail.com"
-          git config --global user.name "Scott Moreau"
-          git am ${{ github.workspace }}/vcpkg-gdk-pixbuf.patch
-          git am ${{ github.workspace }}/vcpkg-atk.patch
           ./bootstrap-vcpkg.bat
           ./vcpkg install pkgconf:x86-windows
+          ./vcpkg install gdk-pixbuf:x86-windows --head
+          ./vcpkg install atk:x86-windows --head
           ./vcpkg install python3:x86-windows
           python -m ensurepip --upgrade
           python -m pip install virtualenv
           ./vcpkg install gobject-introspection:x86-windows
-          ./vcpkg install gdk-pixbuf:x86-windows
           ./vcpkg install librsvg:x86-windows
           ./vcpkg install harfbuzz:x86-windows
           ./vcpkg install cairo:x86-windows
