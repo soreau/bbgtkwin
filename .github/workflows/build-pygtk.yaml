@@ -38,10 +38,10 @@ jobs:
           git clone https://github.com/microsoft/vcpkg.git ./vcpkg
           cd ./vcpkg
           git checkout ${{ env.VCPKG_COMMIT }}
-          (Get-Content -Raw -Path "${{ github.workspace }}/vcpkg-gdk-pixbuf.patch") -replace "`n", "`r`n"
-          Set-Content -Path "${{ github.workspace }}/vcpkg-gdk-pixbuf.patch" -NoNewline
-          (Get-Content -Raw -Path "${{ github.workspace }}/vcpkg-atk.patch") -replace "`n", "`r`n"
-          Set-Content -Path "${{ github.workspace }}/vcpkg-atk.patch" -NoNewline
+          $content = (Get-Content -Raw -Path "${{ github.workspace }}/vcpkg-gdk-pixbuf.patch") -replace "`n", "`r`n"
+          Set-Content -Path "${{ github.workspace }}/vcpkg-gdk-pixbuf.patch" -Value $content -NoNewline
+          $content = (Get-Content -Raw -Path "${{ github.workspace }}/vcpkg-atk.patch") -replace "`n", "`r`n"
+          Set-Content -Path "${{ github.workspace }}/vcpkg-atk.patch" -Value $content -NoNewline
           git apply ${{ github.workspace }}/vcpkg-gdk-pixbuf.patch
           git apply ${{ github.workspace }}/vcpkg-atk.patch
           ./bootstrap-vcpkg.bat
