@@ -37,10 +37,10 @@ index 82d534b447..8b7479a787 100644
          fix_build_error_windows.patch
          loaders-cache.patch
 diff --git a/ports/gtk3/portfile.cmake b/ports/gtk3/portfile.cmake
-index 13f2f08889..67a837e11c 100644
+index 13f2f08889..c6f3fbd84d 100644
 --- a/ports/gtk3/portfile.cmake
 +++ b/ports/gtk3/portfile.cmake
-@@ -6,14 +6,12 @@ if(buildtrees_path_length GREATER warning_length AND CMAKE_HOST_WIN32)
+@@ -6,15 +6,13 @@ if(buildtrees_path_length GREATER warning_length AND CMAKE_HOST_WIN32)
      )
  endif()
  
@@ -55,7 +55,8 @@ index 13f2f08889..67a837e11c 100644
 +    REF "0d3e55cf22abc81b532a3011462b3195f1480974"
 +    HEAD_REF "3.24.51"
      PATCHES
--        0001-build.patch
-         cairo-cpp-linkage.patch
+         0001-build.patch
+-        cairo-cpp-linkage.patch
  )
  
+ vcpkg_find_acquire_program(PKGCONFIG)
