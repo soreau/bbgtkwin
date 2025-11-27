@@ -39,7 +39,7 @@ jobs:
         run: |
           git clone https://github.com/microsoft/vcpkg.git ./vcpkg
           cd ./vcpkg
-          $nuget_exe = & "./vcpkg" fetch nuget | Select-Object -Last 1
+          $nuget_exe = & "./vcpkg/vcpkg" fetch nuget | Select-Object -Last 1
           & $nuget_exe sources add -Name "GitHub" -Source "https://nuget.pkg.github.com/soreau/index.json" -UserName "soreau" -Password "${{ secrets.VCPKG_PAT_TOKEN }}"
           & $nuget_exe setapikey "${{ secrets.VCPKG_PAT_TOKEN }}" -Source "https://nuget.pkg.github.com/soreau/index.json"
           git checkout ${{ env.VCPKG_COMMIT }}
