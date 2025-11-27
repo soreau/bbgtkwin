@@ -39,12 +39,12 @@ jobs:
         run: |
           git clone https://github.com/microsoft/vcpkg.git ./vcpkg
           cd ./vcpkg
-          $nuget_exe = ./vcpkg fetch nuget | Select-Object -Last 1
-          & $nuget_exe sources add -Name "GitHub" -Source "https://nuget.pkg.github.com/soreau/index.json" -UserName "soreau" -Password "${{ secrets.VCPKG_PAT_TOKEN }}"
-          & $nuget_exe setapikey "${{ secrets.VCPKG_PAT_TOKEN }}" -Source "https://nuget.pkg.github.com/soreau/index.json"
           git checkout ${{ env.VCPKG_COMMIT }}
           patch -p1 -i ${{ github.workspace }}/0001-vcpkg-patch.patch
           ./bootstrap-vcpkg.bat
+          $nuget_exe = & "./vcpkg" fetch nuget | Select-Object -Last 1
+          & $nuget_exe sources add -Name "GitHub" -Source "https://nuget.pkg.github.com/soreau/index.json" -UserName "soreau" -Password "${{ secrets.VCPKG_PAT_TOKEN }}"
+          & $nuget_exe setapikey "${{ secrets.VCPKG_PAT_TOKEN }}" -Source "https://nuget.pkg.github.com/soreau/index.json"
           ./vcpkg install pkgconf:x86-windows
           ./vcpkg install gdk-pixbuf:x86-windows
           ./vcpkg install atk:x86-windows
