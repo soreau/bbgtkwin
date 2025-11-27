@@ -1,3 +1,12 @@
+From 2f70577c98ecc187c2bf5ade17b3b31259655a93 Mon Sep 17 00:00:00 2001
+From: Scott Moreau <oreaus@gmail.com>
+Date: Wed, 26 Nov 2025 22:39:04 -0700
+Subject: [PATCH] vcpkg-atk
+
+---
+ ports/atk/portfile.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 diff --git a/ports/atk/portfile.cmake b/ports/atk/portfile.cmake
 index 807f5674ce..a8e64bb5d4 100644
 --- a/ports/atk/portfile.cmake
@@ -11,3 +20,6 @@ index 807f5674ce..a8e64bb5d4 100644
  )
  
  if("introspection" IN_LIST FEATURES)
+-- 
+2.51.1
+

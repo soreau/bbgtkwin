@@ -1,3 +1,12 @@
+From e5cdd60aec7598c7ed3e29b2b7acb5c2e3e8216d Mon Sep 17 00:00:00 2001
+From: Scott Moreau <oreaus@gmail.com>
+Date: Wed, 26 Nov 2025 22:38:39 -0700
+Subject: [PATCH] vcpkg-gdk-pixbuf
+
+---
+ ports/gdk-pixbuf/portfile.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 diff --git a/ports/gdk-pixbuf/portfile.cmake b/ports/gdk-pixbuf/portfile.cmake
 index 82d534b447..3545a65abc 100644
 --- a/ports/gdk-pixbuf/portfile.cmake
@@ -11,3 +20,6 @@ index 82d534b447..3545a65abc 100644
      HEAD_REF master
      PATCHES
          fix_build_error_windows.patch
+-- 
+2.51.1
+
