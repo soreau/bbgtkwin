@@ -24,12 +24,16 @@ jobs:
 
     env:
       VCPKG_COMMIT: '294b9d097e8486770e922890d6a4b757b7dca5e3'
-      VCPKG_BINARY_SOURCES: 'clear;nuget,https://nuget.pkg.github.com/soreau/index.json,readwrite;interactive'
+      VCPKG_BINARY_SOURCES: 'clear;nuget,https://nuget.pkg.github.com/soreau/index.json,readwrite'
       NUGET_GITHUB_TOKEN: '${{ secrets.VCPKG_PAT_TOKEN }}'
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Add GitHub Packages as NuGet source
+        run: |
+          $(vcpkg fetch nuget) sources add -Name github -Source "https://nuget.pkg.github.com/soreau/index.json" -UserName "soreau" -Password "${{ secrets.VCPKG_PAT_TOKEN }}"
 
       - name: Set up pygtkwin environment
         uses: ./actions/pygtkwin-env
