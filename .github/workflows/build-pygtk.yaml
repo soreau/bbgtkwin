@@ -33,12 +33,14 @@ jobs:
         uses: ./actions/pygtkwin-env
 
       - name: vcpkg build
-        uses: johnwason/vcpkg-action@v7
-        with:
-          revision: ${{ env.VCPKG_COMMIT }}
-          manifest-dir: ${{ github.workspace }}
-          triplet: ${{ env.VCPKG_TRIPLET }}
-          token: ${{ github.token }}
+        shell: pwsh
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git ./vcpkg
+          cd ./vcpkg
+          git checkout ${{ env.VCPKG_COMMIT }}
+          ./bootstrap-vcpkg.bat
+          ./vcpkg install python3:x86-windows
+          ./vcpkg install
 
       - name: Prepare for packing
         shell: bash
