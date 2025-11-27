@@ -24,7 +24,8 @@ jobs:
 
     env:
       VCPKG_COMMIT: '294b9d097e8486770e922890d6a4b757b7dca5e3'
-      VCPKG_BINARY_SOURCES: 'clear;nuget,https://nuget.pkg.github.com/bleachbit/index.json,readwrite,Authorization: Bearer ${{ github.token }}'
+      VCPKG_BINARY_SOURCES: 'clear;nuget,https://nuget.pkg.github.com/bleachbit/index.json,readwrite'
+      NUGET_GITHUB_TOKEN: '${{ github.token }}'
 
     steps:
       - name: Checkout code
