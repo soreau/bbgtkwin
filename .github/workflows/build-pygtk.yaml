@@ -23,7 +23,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      VCPKG_COMMIT: 'da93ad9cabf14d54dd9b460a12a458d359a970ff'
+      VCPKG_COMMIT: '294b9d097e8486770e922890d6a4b757b7dca5e3'
 
     steps:
       - name: Checkout code
@@ -38,8 +38,8 @@ jobs:
           git clone https://github.com/microsoft/vcpkg.git ./vcpkg
           cd ./vcpkg
           git checkout ${{ env.VCPKG_COMMIT }}
-          & git apply ${{ github.workspace }}/vcpkg-gdk-pixbuf.patch
-          & git apply ${{ github.workspace }}/vcpkg-atk.patch
+          git apply ${{ github.workspace }}/vcpkg-gdk-pixbuf.patch
+          git apply ${{ github.workspace }}/vcpkg-atk.patch
           ./bootstrap-vcpkg.bat
           ./vcpkg install pkgconf:x86-windows
           ./vcpkg install python3:x86-windows
