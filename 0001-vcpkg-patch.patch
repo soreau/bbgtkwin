@@ -36,3 +36,24 @@ index 82d534b447..8b7479a787 100644
      PATCHES
          fix_build_error_windows.patch
          loaders-cache.patch
+diff --git a/ports/gtk3/portfile.cmake b/ports/gtk3/portfile.cmake
+index 13f2f08889..74ef641206 100644
+--- a/ports/gtk3/portfile.cmake
++++ b/ports/gtk3/portfile.cmake
+@@ -6,12 +6,11 @@ if(buildtrees_path_length GREATER warning_length AND CMAKE_HOST_WIN32)
+     )
+ endif()
+ 
+-vcpkg_from_gitlab(
++vcpkg_from_git(
+     OUT_SOURCE_PATH SOURCE_PATH
+-    GITLAB_URL https://gitlab.gnome.org
+-    REPO GNOME/gtk
+-    REF "${VERSION}"
+-    SHA512 19e5482e4e843aa946ab79c8ce283a7b44aaac43ad99b6913cbc3c91492bf722ebe0238457b75b82be6d6c65a394d32ebc8732832f3f800145e3cf69d5c1e77c
++    URL https://gitlab.gnome.org/GNOME/gtk
++    REF "0d3e55cf22abc81b532a3011462b3195f1480974"
++    HEAD_REF "3.24.51"
+     PATCHES
+         0001-build.patch
+         cairo-cpp-linkage.patch
