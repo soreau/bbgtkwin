@@ -39,8 +39,7 @@ jobs:
           cd ./vcpkg
           git checkout ${{ env.VCPKG_COMMIT }}
           ./bootstrap-vcpkg.bat
-          ./vcpkg install python3:x86-windows
-          ./vcpkg install
+          ./vcpkg install --triplet x86-windows
 
       - name: Prepare for packing
         shell: bash
