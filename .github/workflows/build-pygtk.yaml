@@ -34,16 +34,12 @@ jobs:
       - name: Set up pygtkwin environment
         uses: ./actions/pygtkwin-env
 
-      - name: Add GitHub Packages as NuGet source
-        shell: pwsh
-        run: |
-          $(vcpkg fetch nuget) sources add -Name github -Source "https://nuget.pkg.github.com/soreau/index.json" -UserName "soreau" -Password "${{ secrets.VCPKG_PAT_TOKEN }}"
-
       - name: vcpkg build
         shell: pwsh
         run: |
           git clone https://github.com/microsoft/vcpkg.git ./vcpkg
           cd ./vcpkg
+          $(vcpkg fetch nuget) sources add -Name github -Source "https://nuget.pkg.github.com/soreau/index.json" -UserName "soreau" -Password "${{ secrets.VCPKG_PAT_TOKEN }}"
           git checkout ${{ env.VCPKG_COMMIT }}
           patch -p1 -i ${{ github.workspace }}/0001-vcpkg-patch.patch
           ./bootstrap-vcpkg.bat
