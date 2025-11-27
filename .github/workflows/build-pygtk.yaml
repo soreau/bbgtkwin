@@ -48,6 +48,7 @@ jobs:
           ./vcpkg install python3:x86-windows
           python -m ensurepip --upgrade
           python -m pip install virtualenv
+          ./vcpkg install libepoxy:x86-windows
           ./vcpkg install gtk3:x86-windows
 
       - name: Prepare for packing

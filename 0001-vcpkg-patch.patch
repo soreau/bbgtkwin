@@ -134,3 +134,16 @@ index 13f2f08889..3dc3a11553 100644
      PATCHES
          0001-build.patch
          cairo-cpp-linkage.patch
+diff --git a/ports/libepoxy/portfile.cmake b/ports/libepoxy/portfile.cmake
+index d39b95423d..8e04841260 100644
+--- a/ports/libepoxy/portfile.cmake
++++ b/ports/libepoxy/portfile.cmake
+@@ -15,7 +15,7 @@ vcpkg_from_github(
+ )
+ 
+ if (VCPKG_TARGET_IS_WINDOWS OR VCPKG_TARGET_IS_OSX)
+-    set(OPTIONS -Dglx=no -Degl=no -Dx11=false)
++    set(OPTIONS -Dglx=no -Degl=yes -Dx11=false)
+ elseif(VCPKG_TARGET_IS_ANDROID)
+     set(OPTIONS -Dglx=no -Degl=yes -Dx11=false)
+ else()
