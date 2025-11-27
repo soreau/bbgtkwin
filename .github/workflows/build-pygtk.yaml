@@ -40,11 +40,16 @@ jobs:
           git checkout ${{ env.VCPKG_COMMIT }}
           ./bootstrap-vcpkg.bat
           ./vcpkg install pkgconf:x86-windows
+          ./vcpkg install python3:x86-windows@3.12.9#7
+          python -m ensurepip --upgrade
+          python -m pip install virtualenv
+          ./vcpkg install gobject-introspection:x86-windows@1.82.0
+          ./vcpkg install gdk-pixbuf:x86-windows
           ./vcpkg install librsvg:x86-windows
-          ./vcpkg install harfbuzz:x86-windows
-          ./vcpkg install cairo:x86-windows
-          ./vcpkg install gobject-introspection:x86-windows
-          ./vcpkg install gtk3:x86-windows
+          ./vcpkg install harfbuzz:x86-windows@12.2.0
+          ./vcpkg install cairo:x86-windows@1.18.4
+          ./vcpkg install pango:x86-windows@1.56.4
+          ./vcpkg install gtk3:x86-windows@3.24.43
 
       - name: Prepare for packing
         shell: bash
