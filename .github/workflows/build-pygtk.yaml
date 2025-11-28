@@ -144,6 +144,7 @@ jobs:
           Copy-Item -Path "${{ env.VCPKG_DIR }}\lib\python312.lib" -Destination "${{ env.PYTHON_DIR }}\libs\"
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include Python.h -Recurse
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include pkgconf* -Recurse
+          Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include girepository* -Recurse
 
       - name: Build wheel
         shell: cmd
@@ -167,7 +168,7 @@ jobs:
           )
           ${{ env.PYTHON }} -m pip install "${{ env.PYGOBJECT_WHL }}"
 
-          robocopy /MIR /COPYALL ${{ env.VCPKG_DIR }}\lib\girepository-1.0 ${{ env.PYTHON_DIR }}\lib\girepository-1.0
+          robocopy /MIR /COPYALL ${{ env.VCPKG_DIR }}\lib\*girepository* ${{ env.PYTHON_DIR }}\lib\girepository-1.0
           set PATH=%PATH%;${{ env.VCPKG_DIR }}\bin
           ${{ env.PYTHON }} show_versions.py --required --dll-directory=${{ env.VCPKG_DIR }}\bin
 
