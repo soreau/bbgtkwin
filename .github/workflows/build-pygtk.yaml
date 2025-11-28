@@ -141,12 +141,10 @@ jobs:
         run: |
           echo Searching for python312.lib
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include python312.lib -Recurse
-          New-Item -Path "${{ env.PYTHON_DIR }}\libs" -ItemType Directory
-          Copy-Item -Path "${{ env.VCPKG_DIR }}\lib\python312.lib" -Destination "${{ env.PYTHON_DIR }}\libs\"
-          Copy-Item -Path "${{ env.VCPKG_DIR }}\lib\girepository-2.0.lib" -Destination "${{ env.PYTHON_DIR }}\libs\"
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include Python.h -Recurse
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include pkgconf* -Recurse
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include gi* -Recurse
+          Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include Gtk-3.0.typelib -Recurse
 
       - name: Build wheel
         shell: cmd
@@ -171,7 +169,7 @@ jobs:
           ${{ env.PYTHON }} -m pip install "${{ env.PYGOBJECT_WHL }}"
 
           set PATH=%PATH%;${{ env.VCPKG_DIR }}\bin;${{ env.VCPKG_DIR }}\lib
-          set PYTHONPATH=${{ env.PYTHON_DIR }}\Lib\site-packages
+          set GI_TYPELIB_PATH=${{ env.VCPKG_DIR }}\lib\girepository-1.0
           ${{ env.PYTHON }} show_versions.py --required --dll-directory=${{ env.VCPKG_DIR }}\bin
 
       - name: Upload wheel
