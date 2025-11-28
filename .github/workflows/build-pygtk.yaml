@@ -142,7 +142,7 @@ jobs:
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include *.lib -Recurse
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include python312.lib -Recurse
           New-Item -Path "${{ env.PYTHON_DIR }}\libs" -ItemType Directory
-          Copy-Item -Path "${{ env.VCPKG_DIR }}\python312.lib" -Destination "${{ env.PYTHON_DIR }}\libs\"
+          Copy-Item -Path "${{ env.VCPKG_DIR }}\lib\python312.lib" -Destination "${{ env.PYTHON_DIR }}\libs\"
 
       - name: Build wheel
         shell: cmd
