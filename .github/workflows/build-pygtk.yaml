@@ -141,7 +141,7 @@ jobs:
           echo Searching for python312.lib
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include python312.lib -Recurse
           New-Item -Path "${{ env.PYTHON_DIR }}\libs" -ItemType Directory
-          Copy-Item -Path "${{ env.VCPKG_DIR }}\python312.lib" -Destination "${{ env.PYTHON_DIR }}\libs\"
+          Copy-Item -Path "${{ env.VCPKG_DIR }}\tools\python3\python312.lib" -Destination "${{ env.PYTHON_DIR }}\libs\"
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include pkconf -Recurse
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include python-3.12.pc -Recurse
 
