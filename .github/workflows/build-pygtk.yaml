@@ -135,6 +135,12 @@ jobs:
           ${{ env.PYTHON }} -m pip install --upgrade pip
           ${{ env.PYTHON }} -m pip install -r requirements.txt
 
+      - name: Find python312.lib
+        shell: pwsh
+        run: |
+          echo Searching for python312.lib
+          where /r "${{ env.VCPKG_DIR }}" *python31*.lib*
+
       - name: Build wheel
         shell: cmd
         env:
