@@ -24,8 +24,6 @@ jobs:
 
     env:
       VCPKG_COMMIT: '294b9d097e8486770e922890d6a4b757b7dca5e3'
-      VCPKG_BINARY_SOURCES: 'clear;nuget,https://nuget.pkg.github.com/soreau/index.json,readwrite'
-      NUGET_GITHUB_TOKEN: '${{ secrets.VCPKG_PAT_TOKEN }}'
 
     steps:
       - name: Checkout code
@@ -42,16 +40,10 @@ jobs:
           git checkout ${{ env.VCPKG_COMMIT }}
           patch -p1 -i ${{ github.workspace }}/0001-vcpkg-patch.patch
           ./bootstrap-vcpkg.bat
-          $nuget_exe = & "./vcpkg" fetch nuget | Select-Object -Last 1
-          & $nuget_exe sources add -Name "GitHub" -Source "https://nuget.pkg.github.com/soreau/index.json" -UserName "soreau" -Password "${{ secrets.VCPKG_PAT_TOKEN }}"
-          & $nuget_exe setapikey "${{ secrets.VCPKG_PAT_TOKEN }}" -Source "https://nuget.pkg.github.com/soreau/index.json"
           ./vcpkg install python3:x86-windows
           python -m ensurepip --upgrade
           python -m pip install virtualenv
           ./vcpkg install gobject-introspection:x86-windows
-          ./vcpkg install atk[introspection]:x86-windows
-          ./vcpkg install gdk-pixbuf[introspection]:x86-windows
-          ./vcpkg install pango[introspection]:x86-windows
           ./vcpkg install egl:x86-windows libepoxy:x86-windows
           ./vcpkg install gtk3[introspection]:x86-windows
 
@@ -139,16 +131,15 @@ jobs:
           ${{ env.PYTHON }} -m pip install --upgrade pip
           ${{ env.PYTHON }} -m pip install -r requirements.txt
 
-      - name: Find python312.lib
+      - name: Copy python312.lib to python libs directory
         shell: pwsh
         run: |
-          echo Searching for python312.lib
+          echo Searching for required files
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include python312.lib -Recurse
-          Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include Python.h -Recurse
-          Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include pkgconf* -Recurse
-          Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include gi* -Recurse
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include Gtk-3.0.typelib -Recurse
+          echo Creating python libs directory
           New-Item -Path "${{ env.PYTHON_DIR }}\libs" -ItemType Directory
+          echo Copying python312.lib to libs directory
           Copy-Item -Path "${{ env.VCPKG_DIR }}\lib\python312.lib" -Destination "${{ env.PYTHON_DIR }}\libs\"
 
       - name: Build wheel
