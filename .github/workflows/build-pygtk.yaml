@@ -142,6 +142,7 @@ jobs:
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include python312.lib -Recurse
           New-Item -Path "${{ env.PYTHON_DIR }}\libs" -ItemType Directory
           Copy-Item -Path "${{ env.VCPKG_DIR }}\lib\python312.lib" -Destination "${{ env.PYTHON_DIR }}\libs\"
+          Copy-Item -Path "${{ env.VCPKG_DIR }}\lib\girepository-2.0.lib" -Destination "${{ env.PYTHON_DIR }}\libs\"
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include Python.h -Recurse
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include pkgconf* -Recurse
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include gi* -Recurse
@@ -168,7 +169,6 @@ jobs:
           )
           ${{ env.PYTHON }} -m pip install "${{ env.PYGOBJECT_WHL }}"
 
-          robocopy /MIR /COPYALL ${{ env.VCPKG_DIR }}\lib\ ${{ env.PYTHON_DIR }}\Lib\
           set PATH=%PATH%;${{ env.VCPKG_DIR }}\bin
           set PYTHONPATH=${{ env.PYTHON_DIR }}\Lib\site-packages
           ${{ env.PYTHON }} show_versions.py --required --dll-directory=${{ env.VCPKG_DIR }}\bin
