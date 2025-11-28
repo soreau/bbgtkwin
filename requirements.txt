@@ -5,4 +5,4 @@ ninja==1.11.1.4
 packaging==24.2
 pyproject-metadata==0.9.1
 pyproject_hooks==1.2.0
-pkconf
+pkgconf
