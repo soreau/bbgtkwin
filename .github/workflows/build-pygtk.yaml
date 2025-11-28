@@ -144,7 +144,7 @@ jobs:
           Copy-Item -Path "${{ env.VCPKG_DIR }}\lib\python312.lib" -Destination "${{ env.PYTHON_DIR }}\libs\"
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include Python.h -Recurse
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include pkgconf* -Recurse
-          Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include girepository* -Recurse
+          Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include gi* -Recurse
 
       - name: Build wheel
         shell: cmd
@@ -168,9 +168,10 @@ jobs:
           )
           ${{ env.PYTHON }} -m pip install "${{ env.PYGOBJECT_WHL }}"
 
-          robocopy /MIR /COPYALL ${{ env.VCPKG_DIR }}\lib\girepository-2.0.lib ${{ env.PYTHON_DIR }}\Lib\
+          robocopy /MIR /COPYALL ${{ env.VCPKG_DIR }}\lib\ ${{ env.PYTHON_DIR }}\Lib\
           set PATH=%PATH%;${{ env.VCPKG_DIR }}\bin
-          PYTHONPATH=${{ env.PYTHON_DIR }}\Lib\site-packages ${{ env.PYTHON }} show_versions.py --required --dll-directory=${{ env.VCPKG_DIR }}\bin
+          set PYTHONPATH=${{ env.PYTHON_DIR }}\Lib\site-packages
+          ${{ env.PYTHON }} show_versions.py --required --dll-directory=${{ env.VCPKG_DIR }}\bin
 
       - name: Upload wheel
         uses: actions/upload-artifact@v4
