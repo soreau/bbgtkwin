@@ -139,7 +139,8 @@ jobs:
         shell: pwsh
         run: |
           echo Searching for python312.lib
-          where /r "${{ env.VCPKG_DIR }}" *python31*.lib*
+          Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include *.lib -Recurse
+          Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include python312.lib -Recurse
 
       - name: Build wheel
         shell: cmd
