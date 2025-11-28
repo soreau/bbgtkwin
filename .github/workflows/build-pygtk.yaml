@@ -139,10 +139,9 @@ jobs:
         shell: pwsh
         run: |
           echo Searching for python312.lib
-          Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include *.lib -Recurse
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include python312.lib -Recurse
           New-Item -Path "${{ env.PYTHON_DIR }}\libs" -ItemType Directory
-          Copy-Item -Path "${{ env.VCPKG_DIR }}\lib\python312.lib" -Destination "${{ env.PYTHON_DIR }}\libs\"
+          Copy-Item -Path "${{ env.VCPKG_DIR }}\python312.lib" -Destination "${{ env.PYTHON_DIR }}\libs\"
 
       - name: Build wheel
         shell: cmd
@@ -150,6 +149,7 @@ jobs:
           PKG_CONFIG: ${{ env.VCPKG_DIR }}\tools\pkgconf\pkgconf
           PKG_CONFIG_PATH: ${{ env.VCPKG_DIR }}\lib\pkgconfig
         run: |
+          Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include pkconf -Recurse
           for /F "usebackq" %%i in (`${{ env.PKG_CONFIG }} --cflags python-3.12`) do set CL=%%i
           cd pygobject-${{ env.PYGOBJECT_VERSION }}
           ${{ env.PYTHON }} -m build --wheel
