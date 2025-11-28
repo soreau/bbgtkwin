@@ -147,7 +147,6 @@ jobs:
 
           for /F "usebackq" %%i in (`${{ env.PKG_CONFIG }} --cflags python-3.12`) do set CL=%%i
           cd pygobject-${{ env.PYGOBJECT_VERSION }}
-          patch -p1 < ${{ github.workspace }}\gi.patch
           ${{ env.PYTHON }} -m build --wheel
           dir /b /s *.whl
 
