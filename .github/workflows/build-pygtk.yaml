@@ -168,9 +168,9 @@ jobs:
           )
           ${{ env.PYTHON }} -m pip install "${{ env.PYGOBJECT_WHL }}"
 
-          robocopy /MIR /COPYALL ${{ env.VCPKG_DIR }}\lib\*girepository* ${{ env.PYTHON_DIR }}\lib\girepository-1.0
+          robocopy /MIR /COPYALL ${{ env.VCPKG_DIR }}\lib\girepository-2.0.lib ${{ env.PYTHON_DIR }}\Lib\
           set PATH=%PATH%;${{ env.VCPKG_DIR }}\bin
-          ${{ env.PYTHON }} show_versions.py --required --dll-directory=${{ env.VCPKG_DIR }}\bin
+          PYTHONPATH=${{ env.PYTHON_DIR }}\Lib\site-packages ${{ env.PYTHON }} show_versions.py --required --dll-directory=${{ env.VCPKG_DIR }}\bin
 
       - name: Upload wheel
         uses: actions/upload-artifact@v4
