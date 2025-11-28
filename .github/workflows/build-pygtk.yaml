@@ -148,6 +148,7 @@ jobs:
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include pkgconf* -Recurse
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include gi* -Recurse
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include Gtk-3.0.typelib -Recurse
+          New-Item -Path "${{ env.PYTHON_DIR }}\libs" -ItemType Directory
           Copy-Item -Path "${{ env.VCPKG_DIR }}\lib\python312.lib" -Destination "${{ env.PYTHON_DIR }}\libs\"
 
       - name: Build wheel
