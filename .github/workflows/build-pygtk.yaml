@@ -49,8 +49,11 @@ jobs:
           python -m ensurepip --upgrade
           python -m pip install virtualenv
           ./vcpkg install gobject-introspection:x86-windows
+          ./vcpkg install atk[introspection]:x86-windows
+          ./vcpkg install gdk-pixbuf[introspection]:x86-windows
+          ./vcpkg install pango[introspection]:x86-windows
           ./vcpkg install egl:x86-windows libepoxy:x86-windows
-          ./vcpkg install gtk3:x86-windows
+          ./vcpkg install gtk3[introspection]:x86-windows
 
       - name: Prepare for packing
         shell: bash
