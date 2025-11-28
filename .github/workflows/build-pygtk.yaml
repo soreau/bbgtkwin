@@ -169,7 +169,7 @@ jobs:
           )
           ${{ env.PYTHON }} -m pip install "${{ env.PYGOBJECT_WHL }}"
 
-          set PATH=%PATH%;${{ env.VCPKG_DIR }}\bin
+          set PATH=%PATH%;${{ env.VCPKG_DIR }}\bin;${{ env.VCPKG_DIR }}\lib
           set PYTHONPATH=${{ env.PYTHON_DIR }}\Lib\site-packages
           ${{ env.PYTHON }} show_versions.py --required --dll-directory=${{ env.VCPKG_DIR }}\bin
 
