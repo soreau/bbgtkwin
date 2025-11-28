@@ -148,7 +148,7 @@ jobs:
       - name: Build wheel
         shell: cmd
         env:
-          PKG_CONFIG: ${{ env.VCPKG_DIR }}\tools\python3\Lib\site-packages\pkgconf\.bin\pkgconf.py
+          PKG_CONFIG: ${{ env.VCPKG_DIR }}\tools\python3\Lib\site-packages\pkgconf\.bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{ env.VCPKG_DIR }}\lib\pkgconfig
         run: |
           for /F "usebackq" %%i in (`${{ env.PKG_CONFIG }} --cflags python-3.12`) do set CL=%%i
