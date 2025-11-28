@@ -143,12 +143,12 @@ jobs:
           New-Item -Path "${{ env.PYTHON_DIR }}\libs" -ItemType Directory
           Copy-Item -Path "${{ env.VCPKG_DIR }}\lib\python312.lib" -Destination "${{ env.PYTHON_DIR }}\libs\"
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include Python.h -Recurse
-          Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include pkgconf -Recurse
+          Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include pkgconf* -Recurse
 
       - name: Build wheel
         shell: cmd
         env:
-          PKG_CONFIG: ${{ env.VCPKG_DIR }}\tools\pkgconf\pkgconf
+          PKG_CONFIG: ${{ env.VCPKG_DIR }}tools\python3\Lib\site-packages\pkgconf\pkgconf.py
           PKG_CONFIG_PATH: ${{ env.VCPKG_DIR }}\lib\pkgconfig
         run: |
           for /F "usebackq" %%i in (`${{ env.PKG_CONFIG }} --cflags python-3.12`) do set CL=%%i
