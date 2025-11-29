@@ -24,6 +24,8 @@ jobs:
 
     env:
       VCPKG_COMMIT: '294b9d097e8486770e922890d6a4b757b7dca5e3'
+      VCPKG_BINARY_SOURCES: 'clear;nuget,https://nuget.pkg.github.com/soreau/index.json,readwrite'
+      NUGET_GITHUB_TOKEN: '${{ secrets.VCPKG_PAT_TOKEN }}'
 
     steps:
       - name: Checkout code
@@ -40,11 +42,13 @@ jobs:
           git checkout ${{ env.VCPKG_COMMIT }}
           patch -p1 -i ${{ github.workspace }}/0001-vcpkg-patch.patch
           ./bootstrap-vcpkg.bat
+          $nuget_exe = & "./vcpkg" fetch nuget | Select-Object -Last 1
+          & $nuget_exe sources add -Name "GitHub" -Source "https://nuget.pkg.github.com/soreau/index.json" -UserName "soreau" -Password "${{ secrets.VCPKG_PAT_TOKEN }}"
+          & $nuget_exe setapikey "${{ secrets.VCPKG_PAT_TOKEN }}" -Source "https://nuget.pkg.github.com/soreau/index.json"
           ./vcpkg install python3:x86-windows
           python -m ensurepip --upgrade
           python -m pip install virtualenv
           ./vcpkg install gobject-introspection:x86-windows
-          ./vcpkg install egl:x86-windows libepoxy:x86-windows
           ./vcpkg install gtk3[introspection]:x86-windows
 
       - name: Prepare for packing
