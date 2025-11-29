@@ -36,114 +36,184 @@ index 82d534b447..8b7479a787 100644
      PATCHES
          fix_build_error_windows.patch
          loaders-cache.patch
-diff --git a/ports/gtk3/cairo-cpp-linkage.patch b/ports/gtk3/cairo-cpp-linkage.patch
-index dce7739b62..b699c3f451 100644
---- a/ports/gtk3/cairo-cpp-linkage.patch
-+++ b/ports/gtk3/cairo-cpp-linkage.patch
-@@ -1,8 +1,8 @@
- diff --git a/gtk/meson.build b/gtk/meson.build
--index 79f4f0d..33a7723 100644
-+index ea866d8231..0d312f3e0c 100644
- --- a/gtk/meson.build
- +++ b/gtk/meson.build
--@@ -1074,6 +1074,7 @@ gtk_query_settings = executable(
-+@@ -1102,6 +1102,7 @@ gtk_query_settings = executable(
-    'gtk-query-settings.c',
-    c_args: gtk_cargs,
-    dependencies: libgtk_dep,
-@@ -10,7 +10,7 @@ index 79f4f0d..33a7723 100644
-    install: true
-  )
-  gtk_tools += gtk_query_settings
--@@ -1083,6 +1084,7 @@ gtk_builder_tool = executable(
-+@@ -1111,6 +1112,7 @@ gtk_builder_tool = executable(
-    'gtk-builder-tool.c',
-    c_args: gtk_cargs,
-    dependencies: libgtk_dep,
-@@ -18,7 +18,7 @@ index 79f4f0d..33a7723 100644
-    install: true
-  )
-  gtk_tools += gtk_builder_tool
--@@ -1115,6 +1117,7 @@ gtk_update_icon_cache = executable(
-+@@ -1143,6 +1145,7 @@ gtk_update_icon_cache = executable(
-    extra_update_icon_cache_objs,
-    c_args: gtk_cargs,
-    dependencies: libgtk_dep,
-@@ -26,7 +26,7 @@ index 79f4f0d..33a7723 100644
-    install: true
-  )
-  gtk_tools += gtk_update_icon_cache
--@@ -1125,6 +1128,7 @@ gtk_query_immodules = executable(
-+@@ -1153,6 +1156,7 @@ gtk_query_immodules = executable(
-    'gtkutils.c',
-    c_args: gtk_cargs,
-    dependencies: libgtk_dep,
-@@ -34,7 +34,7 @@ index 79f4f0d..33a7723 100644
-    install: true
-  )
-  gtk_tools += gtk_query_immodules
--@@ -1134,6 +1138,7 @@ gtk_encode_symbolic_svg = executable(
-+@@ -1162,6 +1166,7 @@ gtk_encode_symbolic_svg = executable(
-    'encodesymbolic.c',
-    c_args: gtk_cargs,
-    dependencies: libgtk_dep,
-@@ -42,7 +42,7 @@ index 79f4f0d..33a7723 100644
-    install: true
-  )
-  gtk_tools += gtk_encode_symbolic_svg
--@@ -1143,6 +1148,7 @@ gtk_launch = executable(
-+@@ -1171,6 +1176,7 @@ gtk_launch = executable(
-    'gtk-launch.c',
-    c_args: gtk_cargs,
-    dependencies: libgtk_dep,
-@@ -51,12 +51,12 @@ index 79f4f0d..33a7723 100644
-  )
-  gtk_tools += gtk_launch
- diff --git a/meson.build b/meson.build
--index 287f0cb..d35106f 100644
-+index 397ea0730b..030e67806d 100644
- --- a/meson.build
- +++ b/meson.build
- @@ -1,4 +1,4 @@
---project('gtk+', 'c',
--+project('gtk+', 'c', 'cpp',
--   version: '3.24.43',
-+-project('gtk', 'c',
-++project('gtk', 'c', 'cpp',
-+   version: '3.24.51',
-    default_options: [
-      'buildtype=debugoptimized',
-diff --git a/ports/gtk3/portfile.cmake b/ports/gtk3/portfile.cmake
-index 13f2f08889..3dc3a11553 100644
---- a/ports/gtk3/portfile.cmake
-+++ b/ports/gtk3/portfile.cmake
-@@ -6,12 +6,11 @@ if(buildtrees_path_length GREATER warning_length AND CMAKE_HOST_WIN32)
-     )
- endif()
- 
--vcpkg_from_gitlab(
-+vcpkg_from_git(
-     OUT_SOURCE_PATH SOURCE_PATH
--    GITLAB_URL https://gitlab.gnome.org
--    REPO GNOME/gtk
--    REF "${VERSION}"
--    SHA512 19e5482e4e843aa946ab79c8ce283a7b44aaac43ad99b6913cbc3c91492bf722ebe0238457b75b82be6d6c65a394d32ebc8732832f3f800145e3cf69d5c1e77c
-+    URL https://gitlab.gnome.org/GNOME/gtk.git
-+    REF "0d3e55cf22abc81b532a3011462b3195f1480974"
-+    HEAD_REF "3.24.51"
-     PATCHES
-         0001-build.patch
-         cairo-cpp-linkage.patch
-diff --git a/ports/libepoxy/portfile.cmake b/ports/libepoxy/portfile.cmake
-index d39b95423d..8e04841260 100644
---- a/ports/libepoxy/portfile.cmake
-+++ b/ports/libepoxy/portfile.cmake
-@@ -15,7 +15,7 @@ vcpkg_from_github(
+diff --git a/ports/gobject-introspection/0002-b_vscrt-to-upper-case.patch b/ports/gobject-introspection/0002-b_vscrt-to-upper-case.patch
+new file mode 100644
+index 0000000000..17aac64382
+--- /dev/null
++++ b/ports/gobject-introspection/0002-b_vscrt-to-upper-case.patch
+@@ -0,0 +1,13 @@
++diff --git a/meson.build b/meson.build
++index 7b8bf1c3..b47fc38c 100644
++--- a/meson.build
+++++ b/meson.build
++@@ -96,7 +96,7 @@ if cc.get_argument_syntax() == 'msvc'
++       msvc_crt_cflag = b_vscrt == 'static_from_buildtype' ? '/MT' : '/MD'
++     endif
++   else
++-    msvc_crt_cflag = b_vscrt
+++    msvc_crt_cflag = '/' + b_vscrt.to_upper()
++   endif
++   extra_giscanner_cflags += msvc_crt_cflag
++   extra_giscanner_args = ['--cflags-begin'] + extra_giscanner_cflags + ['--cflags-end']
+diff --git a/ports/gobject-introspection/portfile.cmake b/ports/gobject-introspection/portfile.cmake
+index 2bb82e9513..83a12c8d2d 100644
+--- a/ports/gobject-introspection/portfile.cmake
++++ b/ports/gobject-introspection/portfile.cmake
+@@ -3,7 +3,7 @@ string(REGEX REPLACE "^([0-9]+[.][0-9]+).*\$" "\\1" GI_MAJOR_MINOR "${VERSION}")
+ vcpkg_download_distfile(ARCHIVE
+     URLS "https://download.gnome.org/sources/gobject-introspection/${GI_MAJOR_MINOR}/gobject-introspection-${VERSION}.tar.xz"
+     FILENAME "gobject-introspection-${VERSION}.tar.xz"
+-    SHA512 e139fadb4174c72b648914f3774d89fc0e5eaee45bba0c13edf05de883664dad8276dbc34006217bb09871ed4bad23adab51ff232a17b9eb131329b2926cafb7
++    SHA512 764b5071472f93ed62bd64983c16fc4f73d4e20575d31eb475b40f4c6643080249aec4c5e9536d0ade719a99844cefa5a6e902b4d58e5644d0c0793212da3e5b
  )
  
- if (VCPKG_TARGET_IS_WINDOWS OR VCPKG_TARGET_IS_OSX)
--    set(OPTIONS -Dglx=no -Degl=no -Dx11=false)
-+    set(OPTIONS -Dglx=no -Degl=yes -Dx11=false)
- elseif(VCPKG_TARGET_IS_ANDROID)
-     set(OPTIONS -Dglx=no -Degl=yes -Dx11=false)
- else()
+ vcpkg_extract_source_archive(
+@@ -11,9 +11,11 @@ vcpkg_extract_source_archive(
+     ARCHIVE "${ARCHIVE}"
+     PATCHES
+         0001-g-ir-tool-template.in.patch
+-        0004-fastcall.patch # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/498
++        0002-b_vscrt-to-upper-case.patch
+ )
+ 
++vcpkg_add_to_path("${CURRENT_INSTALLED_DIR}/bin")
++
+ include("${CURRENT_PORT_DIR}/vcpkg-port-config.cmake")
+ vcpkg_get_gobject_introspection_programs(PYTHON3)
+ 
+diff --git a/ports/gobject-introspection/vcpkg.json b/ports/gobject-introspection/vcpkg.json
+index 8c2767aa9d..4912266b7c 100644
+--- a/ports/gobject-introspection/vcpkg.json
++++ b/ports/gobject-introspection/vcpkg.json
+@@ -1,7 +1,6 @@
+ {
+   "name": "gobject-introspection",
+-  "version": "1.82.0",
+-  "port-version": 1,
++  "version": "1.84.0",
+   "description": [
+     "A middleware layer between C libraries (using GObject) and language bindings.",
+     "Building (with) gobject-introspection is based on dynamic library linkage. Static builds of the core feature set are supported only for CI purposes.",
+diff --git a/ports/gtk/0001-build.patch b/ports/gtk/0001-build.patch
+index 40e3529f03..cb14d3a385 100644
+--- a/ports/gtk/0001-build.patch
++++ b/ports/gtk/0001-build.patch
+@@ -1,13 +1,22 @@
+ diff --git a/meson.build b/meson.build
+-index 5efd8a9..d51af19 100644
++index 2738f2d309..6689dd013c 100644
+ --- a/meson.build
+ +++ b/meson.build
+-@@ -857,7 +857,7 @@ subdir('po')
++@@ -495,7 +495,7 @@ tiff_dep          = dependency('libtiff-4', 'tiff')
++ jpeg_dep          = dependency('libjpeg', 'jpeg')
++ rsvg_dep          = dependency('librsvg-2.0', version: rsvg_req, required: false)
++ if not rsvg_dep.found()
++-  rsvg_dep        = dependency('librsvg-2.0', version: ['>= 2.40.23', '< 2.41'])
+++  rsvg_dep        = dependency('librsvg-2.0', version: ['>= 2.40.20'])
++ endif
++ epoxy_dep         = dependency('epoxy', version: epoxy_req)
++ xkbdep            = dependency('xkbcommon', version: xkbcommon_req, required: wayland_enabled)
++@@ -1041,7 +1041,7 @@ if os_unix
++ endif
+  
+- subdir('docs/reference')
+  
+ -if not meson.is_cross_build()
+ +if false
+    gnome.post_install(
+      glib_compile_schemas: true,
+-     gio_querymodules: gio_module_dirs,
++     gtk_update_icon_cache: get_option('build-demos'),
+diff --git a/ports/gtk/portfile.cmake b/ports/gtk/portfile.cmake
+index 58de5f0afb..a91a4a9ddd 100644
+--- a/ports/gtk/portfile.cmake
++++ b/ports/gtk/portfile.cmake
+@@ -1,16 +1,13 @@
+ # It installs only shared libs, regardless build type.
+ vcpkg_check_linkage(ONLY_DYNAMIC_LIBRARY)
+ 
+-vcpkg_from_gitlab(
+-    GITLAB_URL https://gitlab.gnome.org/
++vcpkg_from_git(
++    URL https://gitlab.gnome.org/GNOME/gtk.git
+     OUT_SOURCE_PATH SOURCE_PATH
+-    REPO GNOME/gtk
+-    REF ${VERSION}
+-    SHA512 2e2d3135ebf8cb176a4e5e6f1faa26ae9ea5c3e2441e2c820372a76b78e641f207257600d6a207aa05883e04f29fac1452673bffa0395789b8e482cc6b204673
+-    HEAD_REF master # branch name
++    REF "cbea45a3266b30fbf87156dd66f7914d889d6626"
++    HEAD_REF "${VERSION}"
+     PATCHES
+         0001-build.patch
+-        fix_vulkan_enabled.patch
+ )
+ 
+ vcpkg_find_acquire_program(PKGCONFIG)
+diff --git a/ports/gtk/vcpkg.json b/ports/gtk/vcpkg.json
+index bdd85ce6ae..e60e6ceade 100644
+--- a/ports/gtk/vcpkg.json
++++ b/ports/gtk/vcpkg.json
+@@ -1,7 +1,6 @@
+ {
+   "name": "gtk",
+-  "version": "4.16.3",
+-  "port-version": 3,
++  "version": "4.21.2",
+   "description": "Portable library for creating graphical user interfaces.",
+   "homepage": "https://www.gtk.org/",
+   "license": "LGPL-2.0-only",
+diff --git a/versions/baseline.json b/versions/baseline.json
+index 368893b2d0..9d259aacf6 100644
+--- a/versions/baseline.json
++++ b/versions/baseline.json
+@@ -3409,7 +3409,7 @@
+       "port-version": 0
+     },
+     "gobject-introspection": {
+-      "baseline": "1.82.0",
++      "baseline": "1.84.0",
+       "port-version": 1
+     },
+     "godot-cpp": {
+@@ -3521,8 +3521,8 @@
+       "port-version": 2
+     },
+     "gtk": {
+-      "baseline": "4.16.3",
+-      "port-version": 3
++      "baseline": "4.21.2",
++      "port-version": 0
+     },
+     "gtk3": {
+       "baseline": "3.24.43",
+diff --git a/versions/g-/gobject-introspection.json b/versions/g-/gobject-introspection.json
+index 36e612e4d0..fa61816c9f 100644
+--- a/versions/g-/gobject-introspection.json
++++ b/versions/g-/gobject-introspection.json
+@@ -1,5 +1,10 @@
+ {
+   "versions": [
++    {
++      "git-tree": "b45f51b000a5de089205d4552638f5fe66a71357",
++      "version": "1.84.0",
++      "port-version": 0
++    },
+     {
+       "git-tree": "ea77d8c01f088c46520c98ec3682c93148150b80",
+       "version": "1.82.0",
+diff --git a/versions/g-/gtk.json b/versions/g-/gtk.json
+index 0ad7f149df..cbb8a5de64 100644
+--- a/versions/g-/gtk.json
++++ b/versions/g-/gtk.json
+@@ -1,5 +1,10 @@
+ {
+   "versions": [
++    {
++      "git-tree": "cbea45a3266b30fbf87156dd66f7914d889d6626",
++      "version": "4.21.2",
++      "port-version": 0
++    },
+     {
+       "git-tree": "cdf2d21aa39a6737a3faf10d56636009dadde619",
+       "version": "4.16.3",
