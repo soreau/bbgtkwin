@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - dev*
+      - dev
     tags:
       - 'v*'
   pull_request:
@@ -14,8 +14,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 
 env:
-  VCPKG_TRIPLET: x86-windows
-  GTK_VERSION: 3.24
+  VCPKG_TRIPLET: x64-windows
+  GTK_VERSION: 4.16
 
 jobs:
   vcpkg-build:
@@ -23,7 +23,9 @@ jobs:
     runs-on: windows-latest
 
     env:
-      VCPKG_COMMIT: '294b9d097e8486770e922890d6a4b757b7dca5e3'
+      VCPKG_COMMIT: 'e7d7451462697d77ef319ddf2da8ff7320a82662'
+      VCPKG_BINARY_SOURCES: 'clear;nuget,https://nuget.pkg.github.com/soreau/index.json,readwrite'
+      NUGET_GITHUB_TOKEN: '${{ secrets.VCPKG_PAT_TOKEN }}'
 
     steps:
       - name: Checkout code
@@ -32,46 +34,31 @@ jobs:
       - name: Set up pygtkwin environment
         uses: ./actions/pygtkwin-env
 
-      - name: Cache vcpkg binary cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/vcpkg/archives
-            C:\Users\runneradmin\AppData\Local\vcpkg\archives
-          key: ${{ runner.os }}-vcpkg-${{ env.VCPKG_COMMIT }}-${{ hashFiles('0001-vcpkg-patch.patch') }}
-          restore-keys: |
-            ${{ runner.os }}-vcpkg-${{ env.VCPKG_COMMIT }}-
-            ${{ runner.os }}-vcpkg-
-
       - name: vcpkg build
         shell: pwsh
+        env:
+          PKG_CONFIG_PATH: ${{ env.VCPKG_DIR }}\debug\lib\pkgconfig;${{ env.VCPKG_DIR }}\lib\pkgconfig;D:\a\bbgtkwin\bbgtkwin\vcpkg\packages\librsvg_x64-windows\debug\lib\pkgconfig;D:\a\bbgtkwin\bbgtkwin\vcpkg\packages\librsvg_x64-windows\lib\pkgconfig;${{ env.PKG_CONFIG_PATH }}
+          VCPKG_KEEP_ENV_VARS: 1
+          VCPKG_INSTALLED_DIR: D:/a/bbgtkwin/bbgtkwin/vcpkg/installed/x64-windows
         run: |
           git clone https://github.com/microsoft/vcpkg.git ./vcpkg
           cd ./vcpkg
           git checkout ${{ env.VCPKG_COMMIT }}
           patch -p1 -i ${{ github.workspace }}/0001-vcpkg-patch.patch
           ./bootstrap-vcpkg.bat
-          $cacheDir = Join-Path $env:LOCALAPPDATA 'vcpkg\archives'
-          New-Item -ItemType Directory -Force -Path $cacheDir | Out-Null
-          $binarySource = "clear;files,$cacheDir,readwrite"
-          ./vcpkg install python3:x86-windows --binarysource=$binarySource
-          python -m ensurepip --upgrade
-          python -m pip install virtualenv
-          ./vcpkg install gobject-introspection:x86-windows --binarysource=$binarySource
-          ./vcpkg install gtk3[introspection]:x86-windows --binarysource=$binarySource
-
-      - name: Prepare for packing
-        shell: bash
-        run: |
-          cp -a vcpkg/installed vcpkg_installed
-          echo "Size before cleanup: $(du -sh vcpkg_installed)"
-          rm -rf vcpkg_installed/${{ env.VCPKG_TRIPLET }}/debug vcpkg_installed/${{ env.VCPKG_TRIPLET }}/bin/*.pdb
-          rm -rf vcpkg_installed/vcpkg vcpkg_installed/x64-windows
-          echo "Size after cleanup: $(du -sh vcpkg_installed)"
+          $nuget_exe = & "./vcpkg" fetch nuget | Select-Object -Last 1
+          & $nuget_exe sources add -Name "GitHub" -Source "https://nuget.pkg.github.com/soreau/index.json" -UserName "soreau" -Password "${{ secrets.VCPKG_PAT_TOKEN }}"
+          & $nuget_exe setapikey "${{ secrets.VCPKG_PAT_TOKEN }}" -Source "https://nuget.pkg.github.com/soreau/index.json"
+          ./vcpkg install gobject-introspection:x64-windows
+          ./vcpkg install harfbuzz[introspection]:x64-windows pango[introspection]:x64-windows gdk-pixbuf[introspection]:x64-windows atk[introspection]:x64-windows libcroco:x64-windows librsvg:x64-windows
+          ./vcpkg install d3dx12:x64-windows dxsdk-d3dx:x64-windows directx-headers:x64-windows
+          Copy-Item -Path "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\SDK\ScopeCppSDK\vc15\SDK\lib\dxguid.lib" -Destination "D:\a\bbgtkwin\bbgtkwin\vcpkg\installed\x64-windows\lib\"
+          ./vcpkg install gtk[introspection]:x64-windows
 
       - name: Package the build
         shell: cmd
         run: |
+          cp -a vcpkg/installed vcpkg_installed
           7z a -tzip -mx=9 ${{ env.GTK_BUILD_NAME }}.zip vcpkg_installed
           certutil -hashfile ${{ env.GTK_BUILD_NAME }}.zip SHA256
 
@@ -149,7 +136,7 @@ jobs:
         run: |
           echo Searching for required files
           Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include python312.lib -Recurse
-          Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include Gtk-3.0.typelib -Recurse
+          Get-ChildItem -Path "${{ env.VCPKG_DIR }}" -Include Gtk-4.0.typelib -Recurse
           echo Creating python libs directory
           New-Item -Path "${{ env.PYTHON_DIR }}\libs" -ItemType Directory
           echo Copying python312.lib to libs directory
@@ -166,7 +153,7 @@ jobs:
           ${{ env.PYTHON }} -m build --wheel
           dir /b /s *.whl
 
-          echo PYGOBJECT_WHL=${{ github.workspace }}\pygobject-${{ env.PYGOBJECT_VERSION }}\dist\pygobject-${{ env.PYGOBJECT_VERSION }}-cp312-cp312-win32.whl>>%GITHUB_ENV%
+          echo PYGOBJECT_WHL=${{ github.workspace }}\pygobject-${{ env.PYGOBJECT_VERSION }}\dist\pygobject-${{ env.PYGOBJECT_VERSION }}-cp312-cp312-win_amd64.whl>>%GITHUB_ENV%
 
       - name: Test wheel
         shell: cmd
@@ -180,7 +167,7 @@ jobs:
           robocopy /MIR /COPYALL ${{ env.VCPKG_DIR }}\lib\girepository-1.0 ${{ env.PYTHON_DIR }}\lib\girepository-1.0
           set PATH=%PATH%;${{ env.VCPKG_DIR }}\bin;${{ env.VCPKG_DIR }}\lib
           set GI_TYPELIB_PATH=${{ env.VCPKG_DIR }}\lib\girepository-1.0
-          ${{ env.PYTHON }} show_versions.py --dll-directory=${{ env.VCPKG_DIR }}\bin
+          ${{ env.PYTHON }} show_versions.py --required --dll-directory=${{ env.VCPKG_DIR }}\bin
 
       - name: Upload wheel
         uses: actions/upload-artifact@v4

@@ -23,7 +23,7 @@ def print_gi_versions():
         return
 
     try:
-        gi.require_version("Gtk", "3.0")
+        gi.require_version("Gtk", "4.0")
         from gi.repository import Gtk
     except ImportError as e:
         print(f"GTK not available: {e}")

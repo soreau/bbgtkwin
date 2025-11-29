@@ -1,20 +1,3 @@
-From 94ef7e15e5a32e6d389c2d529caff9bee007ec2c Mon Sep 17 00:00:00 2001
-From: Scott Moreau <oreaus@gmail.com>
-Date: Sat, 29 Nov 2025 11:38:36 -0700
-Subject: [PATCH] vcpkg-patch
-
----
- ports/atk/portfile.cmake           | 10 ++++-----
- ports/gdk-pixbuf/portfile.cmake    | 10 ++++-----
- ports/gtk3/0002-build.patch        | 35 ++++++++++++++++++++++++++++++
- ports/gtk3/cairo-cpp-linkage.patch | 22 +++++++++----------
- ports/gtk3/portfile.cmake          | 10 ++++-----
- ports/gtk3/vcpkg.json              |  3 +--
- versions/baseline.json             |  2 +-
- versions/g-/gtk3.json              |  5 +++++
- 8 files changed, 66 insertions(+), 31 deletions(-)
- create mode 100644 ports/gtk3/0002-build.patch
-
 diff --git a/ports/atk/portfile.cmake b/ports/atk/portfile.cmake
 index 807f5674ce..994a57b1c4 100644
 --- a/ports/atk/portfile.cmake
@@ -53,189 +36,630 @@ index 82d534b447..8b7479a787 100644
      PATCHES
          fix_build_error_windows.patch
          loaders-cache.patch
-diff --git a/ports/gtk3/0002-build.patch b/ports/gtk3/0002-build.patch
-new file mode 100644
-index 0000000000..004f87cc0f
---- /dev/null
-+++ b/ports/gtk3/0002-build.patch
-@@ -0,0 +1,35 @@
-+diff --git a/gdk/win32/gdkglcontext-win32.c b/gdk/win32/gdkglcontext-win32.c
-+index b1cbfa2c04..77746af798 100644
-+--- a/gdk/win32/gdkglcontext-win32.c
-++++ b/gdk/win32/gdkglcontext-win32.c
-+@@ -1312,7 +1312,7 @@ gdk_win32_window_invalidate_egl_framebuffer (GdkWindow *window)
-+       impl->egl_force_redraw_all = TRUE;
+diff --git a/ports/gtk/0001-build.patch b/ports/gtk/0001-build.patch
+index 40e3529f03..5487c441be 100644
+--- a/ports/gtk/0001-build.patch
++++ b/ports/gtk/0001-build.patch
+@@ -1,13 +1,542 @@
++diff --git a/gtk/gdktextureutils.c b/gtk/gdktextureutils.c
++index 2eafda7bad..9c0ae3f677 100644
++--- a/gtk/gdktextureutils.c
+++++ b/gtk/gdktextureutils.c
++@@ -28,208 +28,6 @@
++ #include "gtk/gtkenums.h"
++ #include "gtk/gtkbitmaskprivate.h"
++ 
++-#include <librsvg/rsvg.h>
++-
++-/* {{{ svg helpers */
++-
++-static gboolean
++-gdk_texture_get_rsvg_handle_size (RsvgHandle *handle, gdouble *out_width, gdouble *out_height)
++-{
++-#if LIBRSVG_CHECK_VERSION (2,52,0)
++-  gboolean has_viewbox;
++-  RsvgRectangle viewbox;
++-
++-  if (rsvg_handle_get_intrinsic_size_in_pixels (handle, out_width, out_height))
++-    return TRUE;
++-
++-  rsvg_handle_get_intrinsic_dimensions (handle,
++-                                        NULL, NULL, NULL, NULL,
++-                                        &has_viewbox,
++-                                        &viewbox);
++-
++-  if (has_viewbox)
++-    {
++-      *out_width = viewbox.width;
++-      *out_height = viewbox.height;
++-      return TRUE;
++-    }
++-
++-  return FALSE;
++-#else
++-  RsvgDimensionData dim;
++-  rsvg_handle_get_dimensions (handle, &dim);
++-  if (out_width)
++-    *out_width = dim.width;
++-  if (out_height)
++-    *out_height = dim.height;
++-  return TRUE;
++-#endif
++-}
++-
++-static GdkTexture *
++-gdk_texture_new_from_rsvg (RsvgHandle  *handle,
++-                           int          width,
++-                           int          height,
++-                           GError     **error)
++-{
++-  int stride;
++-  guchar *data;
++-  cairo_surface_t *surface;
++-  cairo_t *cr;
++-  GdkTexture *texture = NULL;
++-
++-  stride = width * 4;
++-  data = g_new0 (guchar, stride * height);
++-
++-  surface = cairo_image_surface_create_for_data (data,
++-                                                 CAIRO_FORMAT_ARGB32,
++-                                                 width, height,
++-                                                 stride);
++-
++-  cr = cairo_create (surface);
++-
++-#if !LIBRSVG_CHECK_VERSION (2,52,0)
++-  {
++-    RsvgDimensionData dim;
++-    gdouble sx,sy,s;
++-
++-    rsvg_handle_get_dimensions (handle, &dim);
++-    sx = (gdouble)width / dim.width;
++-    sy = (gdouble)height / dim.height;
++-    s = MIN (sx, sy);
++-
++-    cairo_scale (cr, s, s);
++-  }
++-
++-  if (!rsvg_handle_render_cairo (handle, cr))
++-    g_set_error (error, GDK_TEXTURE_ERROR, GDK_TEXTURE_ERROR_CORRUPT_IMAGE,
++-                 "Error rendering SVG document (%s)", cairo_status_to_string (cairo_status (cr)));
++-  else
++-#else
++-  if (rsvg_handle_render_document (handle, cr,
++-                                   &(RsvgRectangle) { 0, 0, width, height },
++-                                   error))
++-#endif
++-    {
++-      GBytes *bytes;
++-
++-      bytes = g_bytes_new (data, stride * height);
++-      texture = gdk_memory_texture_new (width, height,
++-                                        GDK_MEMORY_DEFAULT,
++-                                        bytes,
++-                                        stride);
++-      g_bytes_unref (bytes);
++-    }
++-
++-  cairo_destroy (cr);
++-  cairo_surface_destroy (surface);
++-  g_free (data);
++-
++-  return texture;
++-}
++-
++-static GdkTexture *
++-gdk_texture_new_from_svg_bytes (GBytes  *bytes,
++-                                double   scale,
++-                                GError **error)
++-{
++-  const guchar *data;
++-  gsize len;
++-  RsvgHandle *handle;
++-  GdkTexture *texture;
++-  int width, height;
++-  double w, h;
++-
++-  data = g_bytes_get_data (bytes, &len);
++-  handle = rsvg_handle_new_from_data (data, len, error);
++-  if (!handle)
++-    return NULL;
++-
++-  if (!gdk_texture_get_rsvg_handle_size (handle, &w, &h))
++-    {
++-      g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_FAILED,
++-                           "Svg image has no intrinsic size; please set one");
++-      g_object_unref (handle);
++-      return NULL;
++-    }
++-
++-  width = ceil (w * scale);
++-  height = ceil (h * scale);
++-
++-  texture = gdk_texture_new_from_rsvg (handle, width, height, error);
++-  g_object_unref (handle);
++-
++-  return texture;
++-}
++-
++-/* }}} */
++-/* {{{ Symbolic processing */
++-
++-static char *
++-make_stylesheet (const char *fg_color,
++-                 const char *success_color,
++-                 const char *warning_color,
++-                 const char *error_color)
++-{
++-  return g_strconcat ("rect,circle,path,.foreground-fill {\n"
++-                      " fill:", fg_color, "!important;\n"
++-                      "}\n"
++-                      ".warning,.warning-fill {\n"
++-                      " fill:", warning_color, "!important;\n"
++-                      "}\n"
++-                      ".error,.error-fill {\n"
++-                      "  fill:", error_color, "!important;\n"
++-                      "}\n"
++-                      ".success,.success-fill {\n"
++-                      "  fill:", success_color, "!important;\n"
++-                      "}\n"
++-                      ".transparent-fill {\n"
++-                      "  fill: none !important;\n"
++-                      "}\n"
++-                      ".foreground-stroke {\n"
++-                      "  stroke:", fg_color, "!important;\n"
++-                      "}\n"
++-                      ".warning-stroke {\n"
++-                      "  stroke:", warning_color, "!important;\n"
++-                      "}\n"
++-                      ".error-stroke {\n"
++-                      "  stroke:", error_color, "!important;\n"
++-                      "}\n"
++-                      ".success-stroke {\n"
++-                      "  stroke:", success_color, "!important;\n"
++-                      "}",
++-                      NULL);
++-}
++-
++-static GdkTexture *
++-load_symbolic_svg (RsvgHandle  *handle,
++-                   int          width,
++-                   int          height,
++-                   const char  *fg_color,
++-                   const char  *success_color,
++-                   const char  *warning_color,
++-                   const char  *error_color,
++-                   GError     **error)
++-{
++-  GdkTexture *texture = NULL;
++-  char *stylesheet;
++-
++-  stylesheet = make_stylesheet (fg_color, success_color, warning_color, error_color);
++-
++-  if (!rsvg_handle_set_stylesheet (handle, (const guint8 *) stylesheet, strlen (stylesheet), error))
++-    {
++-      g_prefix_error (error, "Could not set stylesheet");
++-      goto out;
++-    }
++-
++-  texture = gdk_texture_new_from_rsvg (handle, width, height, error);
++-
++-out:
++-  g_free (stylesheet);
++-
++-  return texture;
++-}
++-
++ static gboolean
++ extract_plane (GdkTexture *src,
++                guchar     *dst_data,
++@@ -320,22 +118,6 @@ keep_alpha (GdkTexture *src)
++   return res;
++ }
++ 
++-static gboolean
++-svg_has_symbolic_classes (GBytes *bytes)
++-{
++-#ifdef HAVE_MEMMEM
++-  const char *data;
++-  gsize len;
++-
++-  data = g_bytes_get_data (bytes, &len);
++-
++-  /* Not super precise, but good enough */
++-  return memmem (data, len, "class=\"", strlen ("class=\"")) != NULL;
++-#else
++-  return TRUE;
++-#endif
++-}
++-
++ static GdkTexture *
++ gdk_texture_new_from_bytes_symbolic (GBytes    *bytes,
++                                      int        width,
++@@ -344,93 +126,9 @@ gdk_texture_new_from_bytes_symbolic (GBytes    *bytes,
++                                      GError   **error)
++ 
++ {
++-  RsvgHandle *handle;
++-  double w, h;
++-  const char *r_string = "rgb(255,0,0)";
++-  const char *g_string = "rgb(0,255,0)";
++-  gboolean only_fg;
++-  guchar *data;
++   GBytes *data_bytes;
++   GdkTexture *texture;
++ 
++-  handle = rsvg_handle_new_from_data (g_bytes_get_data (bytes, NULL),
++-                                      g_bytes_get_size (bytes),
++-                                      error);
++-
++-  if (width == 0 || height == 0)
++-    {
++-      /* Fetch size from the original icon */
++-      if (!gdk_texture_get_rsvg_handle_size (handle, &w, &h))
++-        {
++-          g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
++-                       "Symbolic icon has no intrinsic size; please set one in its SVG");
++-          g_object_unref (handle);
++-          return NULL;
++-        }
++-
++-      width = (int) ceil (w);
++-      height = (int) ceil (h);
++-    }
++-
++-  if (!svg_has_symbolic_classes (bytes))
++-    {
++-      texture = gdk_texture_new_from_rsvg (handle, width, height, error);
++-
++-      if (texture)
++-        texture = keep_alpha (texture);
++-
++-      if (out_only_fg)
++-        *out_only_fg = TRUE;
++-
++-      g_object_unref (handle);
++-
++-      return texture;
++-    }
++-
++-  only_fg = TRUE;
++-  texture = NULL;
++-
++-  data = NULL;
++-  data_bytes = NULL;
++-
++-  for (int plane = 0; plane < 3; plane++)
++-    {
++-      GdkTexture *loaded;
++-
++-      /* Here we render the svg with all colors solid, this should
++-       * always make the alpha channel the same and it should match
++-       * the final alpha channel for all possible renderings. We
++-       * Just use it as-is for final alpha.
++-       *
++-       * For the 3 non-fg colors, we render once each with that
++-       * color as red, and every other color as green. The resulting
++-       * red will describe the amount of that color is in the
++-       * opaque part of the color. We store these as the rgb
++-       * channels, with the color of the fg being implicitly
++-       * the "rest", as all color fractions should add up to 1.
++-       */
++-      loaded = load_symbolic_svg (handle, width, height,
++-                                  g_string,
++-                                  plane == 0 ? r_string : g_string,
++-                                  plane == 1 ? r_string : g_string,
++-                                  plane == 2 ? r_string : g_string,
++-                                  error);
++-      if (loaded == NULL)
++-        goto out;
++-
++-      if (plane == 0)
++-        {
++-          data = g_new0 (guchar, 4 * width * height);
++-          data_bytes = g_bytes_new_take (data, 4 * width * height);
++-
++-          extract_plane (loaded, data, width, height, 3, 3);
++-        }
++-
++-      only_fg &= extract_plane (loaded, data, width, height, 0, plane);
++-
++-      g_object_unref (loaded);
++-    }
++-
++   texture = gdk_memory_texture_new (width, height,
++                                     GDK_MEMORY_R8G8B8A8,
++                                     data_bytes,
++@@ -438,10 +136,6 @@ gdk_texture_new_from_bytes_symbolic (GBytes    *bytes,
++ 
++ out:
++   g_bytes_unref (data_bytes);
++-  g_object_unref (handle);
++-
++-  if (out_only_fg)
++-    *out_only_fg = only_fg;
++ 
++   return texture;
++ }
++@@ -559,20 +253,7 @@ gdk_texture_new_from_stream_at_scale (GInputStream  *stream,
++                                       GCancellable  *cancellable,
++                                       GError       **error)
++ {
++-  RsvgHandle *handle;
++-  GdkTexture *texture;
++-
++-  if (only_fg)
++-    *only_fg = FALSE;
++-
++-  handle = rsvg_handle_new_from_stream_sync (stream, NULL, RSVG_HANDLE_FLAGS_NONE, NULL, error);
++-  if (!handle)
++-    return NULL;
++-
++-  texture = gdk_texture_new_from_rsvg (handle, width, height, error);
++-  g_object_unref (handle);
++-
++-  return texture;
+++  return NULL;
++ }
++ 
++ GdkTexture *
++@@ -703,23 +384,6 @@ gdk_paintable_new_from_bytes_scaled (GBytes *bytes,
++       /* We know these formats can't be scaled */
++       return GDK_PAINTABLE (gdk_texture_new_from_bytes (bytes, NULL));
 +     }
-+ }
++-  else if (scale == 1)
++-    {
++-      return GDK_PAINTABLE (gdk_texture_new_from_svg_bytes (bytes, scale, NULL));
++-    }
++-  else
++-    {
++-      GdkTexture *texture;
++-      GdkPaintable *paintable;
 +-
-++#ifdef GDK_WIN32_ENABLE_EGL
-+ static gboolean
-+ gdk_win32_display_is_egl_context_current (GdkDisplay   *display,
-+                                           GdkGLContext *context)
-+@@ -1321,7 +1321,7 @@ gdk_win32_display_is_egl_context_current (GdkDisplay   *display,
++-      texture = gdk_texture_new_from_svg_bytes (bytes, scale, NULL);
++-      if (texture)
++-        {
++-          paintable = gtk_scaler_new (GDK_PAINTABLE (texture), scale);
++-          g_object_unref (texture);
++-          return paintable;
++-        }
++-    }
 + 
-+   return context_egl->egl_context == eglGetCurrentContext ();
++   return NULL;
 + }
-+-
-++#endif
-+ static gboolean
-+ gdk_win32_display_make_egl_context_current (GdkDisplay   *display,
-+                                             GdkGLContext *context)
-+@@ -1553,10 +1553,10 @@ gdk_win32_display_is_gl_context_current (GdkDisplay   *display,
++@@ -952,52 +616,7 @@ start_element_cb (GMarkupParseContext  *context,
++   gboolean do_fill = FALSE;
++   gboolean do_stroke = FALSE;
 + 
-+   if (display_win32->gl_type == GDK_WIN32_GL_WGL)
-+     return gdk_win32_display_is_wgl_context_current (display, context);
++-  if (strcmp (element_name, "svg") == 0)
++-    {
++-      const char *width_attr = NULL;
++-      const char *height_attr = NULL;
 +-
-++#ifdef GDK_WIN32_ENABLE_EGL
-+   if (display_win32->gl_type == GDK_WIN32_GL_EGL)
-+     return gdk_win32_display_is_egl_context_current (display, context);
++-      markup_filter_attributes (element_name,
++-                                attribute_names,
++-                                attribute_values,
++-                                NULL,
++-                                "width", &width_attr,
++-                                "height", &height_attr,
++-                                NULL);
 +-
-++#endif
-+   g_assert_not_reached ();
-+   return TRUE;
++-      if (width_attr == NULL)
++-        {
++-          set_missing_attribute_error (error, "width");
++-          return;
++-        }
++-
++-      data->width = g_ascii_strtod (width_attr, &end);
++-      if (end && *end != '\0' && strcmp (end, "px") != 0)
++-        {
++-          set_attribute_error (error, "width", width_attr);
++-          return;
++-        }
++-
++-      if (height_attr == NULL)
++-        {
++-          set_missing_attribute_error (error, "height");
++-          return;
++-        }
++-
++-      data->height = g_ascii_strtod (height_attr, &end);
++-      if (end && *end != '\0' && strcmp (end, "px") != 0)
++-        {
++-          set_attribute_error (error, "height", height_attr);
++-          return;
++-        }
++-
++-      gtk_snapshot_push_clip (data->snapshot, &GRAPHENE_RECT_INIT (0, 0, data->width, data->height));
++-      data->has_clip = TRUE;
++-
++-      /* Done */
++-      return;
++-    }
++-  else if (strcmp (element_name, "g") == 0 ||
+++  if (strcmp (element_name, "g") == 0 ||
++            strcmp (element_name, "defs") == 0 ||
++            strcmp (element_name, "style") == 0 ||
++            g_str_has_prefix (element_name, "sodipodi:") ||
++@@ -1460,16 +1079,6 @@ end_element_cb (GMarkupParseContext *context,
++                 gpointer             user_data,
++                 GError             **error)
++ {
++-  ParserData *data = user_data;
++-
++-  if (strcmp (element_name, "svg") == 0)
++-    {
++-      if (data->has_clip)
++-        {
++-          gtk_snapshot_pop (data->snapshot);
++-          data->has_clip = FALSE;
++-        }
++-    }
 + }
-diff --git a/ports/gtk3/cairo-cpp-linkage.patch b/ports/gtk3/cairo-cpp-linkage.patch
-index dce7739b62..b699c3f451 100644
---- a/ports/gtk3/cairo-cpp-linkage.patch
-+++ b/ports/gtk3/cairo-cpp-linkage.patch
-@@ -1,8 +1,8 @@
- diff --git a/gtk/meson.build b/gtk/meson.build
--index 79f4f0d..33a7723 100644
-+index ea866d8231..0d312f3e0c 100644
- --- a/gtk/meson.build
- +++ b/gtk/meson.build
--@@ -1074,6 +1074,7 @@ gtk_query_settings = executable(
-+@@ -1102,6 +1102,7 @@ gtk_query_settings = executable(
-    'gtk-query-settings.c',
-    c_args: gtk_cargs,
-    dependencies: libgtk_dep,
-@@ -10,7 +10,7 @@ index 79f4f0d..33a7723 100644
-    install: true
-  )
-  gtk_tools += gtk_query_settings
--@@ -1083,6 +1084,7 @@ gtk_builder_tool = executable(
-+@@ -1111,6 +1112,7 @@ gtk_builder_tool = executable(
-    'gtk-builder-tool.c',
-    c_args: gtk_cargs,
-    dependencies: libgtk_dep,
-@@ -18,7 +18,7 @@ index 79f4f0d..33a7723 100644
-    install: true
-  )
-  gtk_tools += gtk_builder_tool
--@@ -1115,6 +1117,7 @@ gtk_update_icon_cache = executable(
-+@@ -1143,6 +1145,7 @@ gtk_update_icon_cache = executable(
-    extra_update_icon_cache_objs,
-    c_args: gtk_cargs,
-    dependencies: libgtk_dep,
-@@ -26,7 +26,7 @@ index 79f4f0d..33a7723 100644
-    install: true
-  )
-  gtk_tools += gtk_update_icon_cache
--@@ -1125,6 +1128,7 @@ gtk_query_immodules = executable(
-+@@ -1153,6 +1156,7 @@ gtk_query_immodules = executable(
-    'gtkutils.c',
-    c_args: gtk_cargs,
-    dependencies: libgtk_dep,
-@@ -34,7 +34,7 @@ index 79f4f0d..33a7723 100644
-    install: true
-  )
-  gtk_tools += gtk_query_immodules
--@@ -1134,6 +1138,7 @@ gtk_encode_symbolic_svg = executable(
-+@@ -1162,6 +1166,7 @@ gtk_encode_symbolic_svg = executable(
-    'encodesymbolic.c',
-    c_args: gtk_cargs,
-    dependencies: libgtk_dep,
-@@ -42,7 +42,7 @@ index 79f4f0d..33a7723 100644
-    install: true
-  )
-  gtk_tools += gtk_encode_symbolic_svg
--@@ -1143,6 +1148,7 @@ gtk_launch = executable(
-+@@ -1171,6 +1176,7 @@ gtk_launch = executable(
-    'gtk-launch.c',
-    c_args: gtk_cargs,
-    dependencies: libgtk_dep,
-@@ -51,12 +51,12 @@ index 79f4f0d..33a7723 100644
-  )
-  gtk_tools += gtk_launch
++ 
++ static GskRenderNode *
++diff --git a/gtk/meson.build b/gtk/meson.build
++index 6537e617ad..3a403fbeff 100644
++--- a/gtk/meson.build
+++++ b/gtk/meson.build
++@@ -1021,7 +1021,6 @@ gtk_deps = [
++   pixbuf_dep,
++   epoxy_dep,
++   media_deps,
++-  rsvg_dep,
++   libm,
++   graphene_dep,
++   accesskit_dep,
++@@ -1161,7 +1160,7 @@ if build_gir
++   gir_args = [
++     '-DGTK_COMPILATION',
++     '--quiet',
++-     '--doc-format=gi-docgen',
+++    '--doc-format=gi-docgen',
++   ]
++ 
++   gdk_gir_inc = [ 'cairo-1.0', 'Gio-2.0', 'GdkPixbuf-2.0', 'Pango-1.0', 'PangoCairo-1.0' ]
  diff --git a/meson.build b/meson.build
--index 287f0cb..d35106f 100644
-+index 397ea0730b..030e67806d 100644
+-index 5efd8a9..d51af19 100644
++index 42f9b598ea..7bd0cc9261 100644
  --- a/meson.build
  +++ b/meson.build
- @@ -1,4 +1,4 @@
---project('gtk+', 'c',
--+project('gtk+', 'c', 'cpp',
--   version: '3.24.43',
-+-project('gtk', 'c',
-++project('gtk', 'c', 'cpp',
-+   version: '3.24.51',
-    default_options: [
-      'buildtype=debugoptimized',
-diff --git a/ports/gtk3/portfile.cmake b/ports/gtk3/portfile.cmake
-index 13f2f08889..96acddd07e 100644
---- a/ports/gtk3/portfile.cmake
-+++ b/ports/gtk3/portfile.cmake
-@@ -6,14 +6,14 @@ if(buildtrees_path_length GREATER warning_length AND CMAKE_HOST_WIN32)
-     )
- endif()
+-@@ -857,7 +857,7 @@ subdir('po')
++@@ -7,17 +7,7 @@ project('gtk', 'c',
++           # https://github.com/mesonbuild/meson/issues/2289
++           'c_std=gnu11',
++           'cpp_std=c++11',
++-        ] + (meson.version().version_compare('>= 1.8.0') ? [
++-          # rsvg subproject options
++-          # meson < 1.8 had issues with parsing default_options
++-          # keys for subprojects, if the project being evaluated
++-          # also was a subproject.
++-          # We'll just not pass them along in that case.
++-          # TODO: move this back once we require meson >= 1.8
++-          'librsvg:default_library=static',
++-          'librsvg:rsvg-convert=disabled',
++-          'librsvg:rsvg-view-3=disabled',
++-        ] : []),
+++        ],
++         meson_version : '>= 1.5.0',
++         license: 'LGPL-2.1-or-later')
++ 
++@@ -44,7 +34,6 @@ sysprof_req        = '>= 3.38.0'
++ vulkan_req         = '>= 1.3'
++ gstreamer_req      = '>= 1.24.0'
++ gi_req             = '>= 1.84'
++-rsvg_req           = '>= 2.48'
++ 
++ fs = import('fs')
++ gnome = import('gnome')
++@@ -493,10 +482,6 @@ pixbuf_dep        = dependency('gdk-pixbuf-2.0', version: gdk_pixbuf_req,
++ png_dep           = dependency('libpng', 'png')
++ tiff_dep          = dependency('libtiff-4', 'tiff')
++ jpeg_dep          = dependency('libjpeg', 'jpeg')
++-rsvg_dep          = dependency('librsvg-2.0', version: rsvg_req, required: false)
++-if not rsvg_dep.found()
++-  rsvg_dep        = dependency('librsvg-2.0', version: ['>= 2.40.23', '< 2.41'])
++-endif
++ epoxy_dep         = dependency('epoxy', version: epoxy_req)
++ xkbdep            = dependency('xkbcommon', version: xkbcommon_req, required: wayland_enabled)
++ graphene_dep      = dependency('graphene-gobject-1.0', version: graphene_req,
++@@ -1041,7 +1026,7 @@ if os_unix
++ endif
+  
+- subdir('docs/reference')
+  
+ -if not meson.is_cross_build()
+ +if false
+    gnome.post_install(
+      glib_compile_schemas: true,
+-     gio_querymodules: gio_module_dirs,
++     gtk_update_icon_cache: get_option('build-demos'),
++diff --git a/tools/meson.build b/tools/meson.build
++index 99c8804b6f..db58424ad3 100644
++--- a/tools/meson.build
+++++ b/tools/meson.build
++@@ -60,7 +60,6 @@ gtk_tools = [
++                        'gtk-image-tool-utils.c',
++                         '../testsuite/reftests/reftest-compare.c'], [libgtk_dep] ],
++   ['gtk4-update-icon-cache', ['updateiconcache.c', '../gtk/gtkiconcachevalidator.c' ] + extra_update_icon_cache_objs, [ libgtk_dep ] ],
++-  ['gtk4-encode-symbolic-svg', ['encodesymbolic.c'], [ libgtk_static_dep ] ],
++ ]
++ 
++ if os_unix
+diff --git a/ports/gtk/portfile.cmake b/ports/gtk/portfile.cmake
+index 58de5f0afb..0805fba1a6 100644
+--- a/ports/gtk/portfile.cmake
++++ b/ports/gtk/portfile.cmake
+@@ -1,22 +1,21 @@
+ # It installs only shared libs, regardless build type.
+ vcpkg_check_linkage(ONLY_DYNAMIC_LIBRARY)
  
 -vcpkg_from_gitlab(
+-    GITLAB_URL https://gitlab.gnome.org/
 +vcpkg_from_git(
-     OUT_SOURCE_PATH SOURCE_PATH
--    GITLAB_URL https://gitlab.gnome.org
--    REPO GNOME/gtk
--    REF "${VERSION}"
--    SHA512 19e5482e4e843aa946ab79c8ce283a7b44aaac43ad99b6913cbc3c91492bf722ebe0238457b75b82be6d6c65a394d32ebc8732832f3f800145e3cf69d5c1e77c
 +    URL https://gitlab.gnome.org/GNOME/gtk.git
-+    REF "0d3e55cf22abc81b532a3011462b3195f1480974"
-+    HEAD_REF "3.24.51"
+     OUT_SOURCE_PATH SOURCE_PATH
+-    REPO GNOME/gtk
+-    REF ${VERSION}
+-    SHA512 2e2d3135ebf8cb176a4e5e6f1faa26ae9ea5c3e2441e2c820372a76b78e641f207257600d6a207aa05883e04f29fac1452673bffa0395789b8e482cc6b204673
+-    HEAD_REF master # branch name
++    REF "b8be85884fd693a45a321440cbcc4298df957715"
++    HEAD_REF "${VERSION}"
      PATCHES
          0001-build.patch
-+        0002-build.patch
-         cairo-cpp-linkage.patch
+-        fix_vulkan_enabled.patch
  )
  
-diff --git a/ports/gtk3/vcpkg.json b/ports/gtk3/vcpkg.json
-index c931b6be9b..41b32c227d 100644
---- a/ports/gtk3/vcpkg.json
-+++ b/ports/gtk3/vcpkg.json
+ vcpkg_find_acquire_program(PKGCONFIG)
+ get_filename_component(PKGCONFIG_DIR "${PKGCONFIG}" DIRECTORY )
+ vcpkg_add_to_path("${PKGCONFIG_DIR}") # Post install script runs pkg-config so it needs to be on PATH
+ vcpkg_add_to_path("${CURRENT_HOST_INSTALLED_DIR}/tools/glib/")
++vcpkg_add_to_path("${CURRENT_INSTALLED_DIR}/bin")
++vcpkg_add_to_path("${CURRENT_INSTALLED_DIR}/lib")
+ 
+ set(x11 false)
+ set(win32 false)
+diff --git a/ports/gtk/vcpkg.json b/ports/gtk/vcpkg.json
+index bdd85ce6ae..77c44eead4 100644
+--- a/ports/gtk/vcpkg.json
++++ b/ports/gtk/vcpkg.json
 @@ -1,7 +1,6 @@
  {
-   "name": "gtk3",
--  "version": "3.24.43",
--  "port-version": 2,
-+  "version": "3.24.51",
+   "name": "gtk",
+-  "version": "4.16.3",
+-  "port-version": 3,
++  "version": "4.21.3",
    "description": "Portable library for creating graphical user interfaces.",
    "homepage": "https://www.gtk.org/",
-   "license": null,
+   "license": "LGPL-2.0-only",
 diff --git a/versions/baseline.json b/versions/baseline.json
-index 368893b2d0..0d88a3aa6b 100644
+index 99dc25af19..761863740d 100644
 --- a/versions/baseline.json
 +++ b/versions/baseline.json
-@@ -3525,7 +3525,7 @@
-       "port-version": 3
-     },
-     "gtk3": {
--      "baseline": "3.24.43",
-+      "baseline": "3.24.51",
+@@ -3521,8 +3521,8 @@
        "port-version": 2
      },
-     "gtkmm": {
-diff --git a/versions/g-/gtk3.json b/versions/g-/gtk3.json
-index f31c63d6c4..c342b08a9a 100644
---- a/versions/g-/gtk3.json
-+++ b/versions/g-/gtk3.json
+     "gtk": {
+-      "baseline": "4.16.3",
+-      "port-version": 3
++      "baseline": "4.21.3",
++      "port-version": 0
+     },
+     "gtk3": {
+       "baseline": "3.24.43",
+diff --git a/versions/g-/gtk.json b/versions/g-/gtk.json
+index 0ad7f149df..f9b8f7a95c 100644
+--- a/versions/g-/gtk.json
++++ b/versions/g-/gtk.json
 @@ -1,5 +1,10 @@
  {
    "versions": [
 +    {
-+      "git-tree": "0d3e55cf22abc81b532a3011462b3195f1480974",
-+      "version": "3.24.51",
++      "git-tree": "b8be85884fd693a45a321440cbcc4298df957715",
++      "version": "4.21.3",
 +      "port-version": 0
 +    },
      {
-       "git-tree": "694065b241970f49ea673268b3a6dd4bf9f6d949",
-       "version": "3.24.43",
--- 
-2.51.1
-
+       "git-tree": "cdf2d21aa39a6737a3faf10d56636009dadde619",
+       "version": "4.16.3",
