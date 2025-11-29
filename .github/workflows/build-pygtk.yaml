@@ -32,6 +32,17 @@ jobs:
       - name: Set up pygtkwin environment
         uses: ./actions/pygtkwin-env
 
+      - name: Cache vcpkg binary cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/vcpkg/archives
+            C:\Users\runneradmin\AppData\Local\vcpkg\archives
+          key: ${{ runner.os }}-vcpkg-${{ env.VCPKG_COMMIT }}-${{ hashFiles('0001-vcpkg-patch.patch') }}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-${{ env.VCPKG_COMMIT }}-
+            ${{ runner.os }}-vcpkg-
+
       - name: vcpkg build
         shell: pwsh
         run: |
@@ -40,11 +51,14 @@ jobs:
           git checkout ${{ env.VCPKG_COMMIT }}
           patch -p1 -i ${{ github.workspace }}/0001-vcpkg-patch.patch
           ./bootstrap-vcpkg.bat
-          ./vcpkg install python3:x86-windows
+          $cacheDir = Join-Path $env:LOCALAPPDATA 'vcpkg\archives'
+          New-Item -ItemType Directory -Force -Path $cacheDir | Out-Null
+          $binarySource = "clear;files,$cacheDir,readwrite"
+          ./vcpkg install python3:x86-windows --binarysource=$binarySource
           python -m ensurepip --upgrade
           python -m pip install virtualenv
-          ./vcpkg install gobject-introspection:x86-windows
-          ./vcpkg install gtk3[introspection]:x86-windows
+          ./vcpkg install gobject-introspection:x86-windows --binarysource=$binarySource
+          ./vcpkg install gtk3[introspection]:x86-windows --binarysource=$binarySource
 
       - name: Prepare for packing
         shell: bash
