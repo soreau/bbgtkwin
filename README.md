@@ -2,13 +2,16 @@
 
 This project builds the Python and GTK framework for BleachBit
 to use on Microsoft Windows. This includes introspection support
-and a PyGObject wheel. We use Microsoft Visual C++ and vcpkg instead
-of gcc and msys2.
+and a PyGObject wheel. Consistent with PyPI packaging practices, we
+use Microsoft Visual C++ and vcpkg instead of gcc and MSYS2.
 
-As of 2025-03-27, this project builds
-* Python 3.11.10
-* GTK 3.24.43
-* PyGObject 3.51.0
+As of 2025-11-30, this project builds:
+* Python 3.12.9
+* GTK 3.24.51
+* PyGObject 3.55.0
+* Pango 1.56.4
+* Fontconfig 2.15.0
+* HarfBuzz 12.2.0
 
 The build environment is GitHub Actions with MSVC++ 2022.
 For more information about the build environment and build
@@ -24,5 +27,5 @@ from the BleachBit repository.
 Copyright (C) 2025 by Andrew Ziem. All rights reserved.
 See [LICENSE](LICENSE) for license information.
 
-Special thanks to @soylent-io for work to keep BleachBit
+Special thanks to @soylent-io and @soreau for their work to keep BleachBit
 running on Windows.
