@@ -9,22 +9,31 @@ index 66c872e4..ea472f79 100644
 -    g_autofree char *upper = g_ascii_strup(value_nick, -1);
 +    char *upper = g_ascii_strup(value_nick, -1);
      char *c;
- 
+
+    /* Manual management avoids g_autofree, which MSVC lacks, and lets us
+     * provide a clear failure path when allocation fails. */
+    if (G_UNLIKELY (upper == NULL)) {
+        PyErr_NoMemory ();
+        return;
+    }
+
      for (c = upper; *c != '\0'; c++) {
-@@ -89,9 +89,13 @@ add_value (PyObject *dict, const char *value_nick, int value)
+        if (*c == '-') {
+            *c = '_';
+        }
      }
- 
+
      /* skip if the name already exists in the dictionary */
 -    if (PyDict_GetItemString (dict, upper) != NULL) return;
 +    if (PyDict_GetItemString (dict, upper) != NULL)
 +        goto cleanup;
- 
+
      PyDict_SetItemString (dict, upper, PyLong_FromLong (value));
 +
 +cleanup:
 +    g_free (upper);
  }
- 
+
  PyObject *
 diff --git a/gi/pygflags.c b/gi/pygflags.c
 index b6ee371f..1b070c0b 100644
@@ -37,20 +46,28 @@ index b6ee371f..1b070c0b 100644
 -    g_autofree char *upper = g_ascii_strup(value_nick, -1);
 +    char *upper = g_ascii_strup(value_nick, -1);
      char *c;
- 
+
+    /* Mirror manual free logic for MSVC builds and guard allocation */
+    if (G_UNLIKELY (upper == NULL)) {
+        PyErr_NoMemory ();
+        return;
+    }
+
      for (c = upper; *c != '\0'; c++) {
-@@ -88,9 +88,13 @@ add_value (PyObject *dict, const char *value_nick, unsigned int value)
+        if (*c == '-') {
+            *c = '_';
+        }
      }
- 
+
      /* skip if the name already exists in the dictionary */
 -    if (PyDict_GetItemString (dict, upper) != NULL) return;
 +    if (PyDict_GetItemString (dict, upper) != NULL)
 +        goto cleanup;
- 
+
      PyDict_SetItemString (dict, upper, PyLong_FromUnsignedLong (value));
 +
 +cleanup:
 +    g_free (upper);
  }
- 
+
  PyObject *
