@@ -29,3 +29,5 @@ See [LICENSE](LICENSE) for license information.
 
 Special thanks to @soylent-io and @soreau for their work to keep BleachBit
 running on Windows.
+
+Tip: [nektos/act](https://github.com/nektos/act) is tool for running GitHub Actions locally.
