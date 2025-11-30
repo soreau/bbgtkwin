@@ -19,7 +19,7 @@ def print_versions(exit_on_error=False):
     print(f"PyGObject version: {gi.__version__}")
 
     try:
-        gi.require_version("Gtk", "3.0")
+        gi.require_version("Gtk", "4.0")
         from gi.repository import Gtk
     except ImportError as e:
         print(f"GTK not available: {e}")
