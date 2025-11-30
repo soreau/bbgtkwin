@@ -9,22 +9,20 @@ runs:
       with:
         arch: x86
 
-    - name: Set GTK_BUILD_NAME
-      shell: bash
-      run: echo 'GTK_BUILD_NAME=gtk${{ env.GTK_VERSION }}-${{ env.VCPKG_TRIPLET }}' >>$GITHUB_ENV
+    - name: Configure pygtkwin environment
+      shell: pwsh
+      run: |
+        $gtkBuildName = "gtk$env:GTK_VERSION-$env:VCPKG_TRIPLET"
+        [System.IO.File]::AppendAllText($env:GITHUB_ENV, "GTK_BUILD_NAME=$gtkBuildName`n")
 
-    - name: Set VCPKG_DIR
-      shell: bash
-      run: echo 'VCPKG_DIR=${{ github.workspace }}\vcpkg_installed\${{ env.VCPKG_TRIPLET }}' >>$GITHUB_ENV
+        $vcpkgDir = Join-Path (Join-Path $env:GITHUB_WORKSPACE 'vcpkg_installed') $env:VCPKG_TRIPLET
+        [System.IO.File]::AppendAllText($env:GITHUB_ENV, "VCPKG_DIR=$vcpkgDir`n")
 
-    - name: Set PYTHON_DIR
-      shell: bash
-      run: echo 'PYTHON_DIR=${{ env.VCPKG_DIR }}\tools\python3' >>$GITHUB_ENV
+        $pythonDir = Join-Path (Join-Path $vcpkgDir 'tools') 'python3'
+        [System.IO.File]::AppendAllText($env:GITHUB_ENV, "PYTHON_DIR=$pythonDir`n")
 
-    - name: Set PYTHON
-      shell: bash
-      run: echo 'PYTHON=${{ env.PYTHON_DIR }}\python.exe' >>$GITHUB_ENV
+        $pythonExe = Join-Path $pythonDir 'python.exe'
+        [System.IO.File]::AppendAllText($env:GITHUB_ENV, "PYTHON=$pythonExe`n")
 
-    - name: Set PATH
-      shell: bash
-      run: echo 'PATH=${{ env.PYTHON_DIR }};${{ env.PYTHON_DIR }}\Scripts;${{ env.PATH }}' >>$GITHUB_ENV
+        $updatedPath = "$pythonDir;$pythonDir\Scripts;$env:PATH"
+        [System.IO.File]::AppendAllText($env:GITHUB_ENV, "PATH=$updatedPath`n")
