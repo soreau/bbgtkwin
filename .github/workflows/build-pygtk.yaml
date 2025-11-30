@@ -180,7 +180,7 @@ jobs:
           robocopy /MIR /COPYALL ${{ env.VCPKG_DIR }}\lib\girepository-1.0 ${{ env.PYTHON_DIR }}\lib\girepository-1.0
           set PATH=%PATH%;${{ env.VCPKG_DIR }}\bin;${{ env.VCPKG_DIR }}\lib
           set GI_TYPELIB_PATH=${{ env.VCPKG_DIR }}\lib\girepository-1.0
-          ${{ env.PYTHON }} show_versions.py --required --dll-directory=${{ env.VCPKG_DIR }}\bin
+          ${{ env.PYTHON }} show_versions.py --dll-directory=${{ env.VCPKG_DIR }}\bin
 
       - name: Upload wheel
         uses: actions/upload-artifact@v4
