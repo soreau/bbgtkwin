@@ -36,6 +36,47 @@ index 82d534b447..8b7479a787 100644
      PATCHES
          fix_build_error_windows.patch
          loaders-cache.patch
+diff --git a/ports/gtk3/0002-build.patch b/ports/gtk3/0002-build.patch
+new file mode 100644
+index 0000000000..004f87cc0f
+--- /dev/null
++++ b/ports/gtk3/0002-build.patch
+@@ -0,0 +1,35 @@
++diff --git a/gdk/win32/gdkglcontext-win32.c b/gdk/win32/gdkglcontext-win32.c
++index b1cbfa2c04..77746af798 100644
++--- a/gdk/win32/gdkglcontext-win32.c
+++++ b/gdk/win32/gdkglcontext-win32.c
++@@ -1312,7 +1312,7 @@ gdk_win32_window_invalidate_egl_framebuffer (GdkWindow *window)
++       impl->egl_force_redraw_all = TRUE;
++     }
++ }
++-
+++#ifdef GDK_WIN32_ENABLE_EGL
++ static gboolean
++ gdk_win32_display_is_egl_context_current (GdkDisplay   *display,
++                                           GdkGLContext *context)
++@@ -1321,7 +1321,7 @@ gdk_win32_display_is_egl_context_current (GdkDisplay   *display,
++ 
++   return context_egl->egl_context == eglGetCurrentContext ();
++ }
++-
+++#endif
++ static gboolean
++ gdk_win32_display_make_egl_context_current (GdkDisplay   *display,
++                                             GdkGLContext *context)
++@@ -1553,10 +1553,10 @@ gdk_win32_display_is_gl_context_current (GdkDisplay   *display,
++ 
++   if (display_win32->gl_type == GDK_WIN32_GL_WGL)
++     return gdk_win32_display_is_wgl_context_current (display, context);
++-
+++#ifdef GDK_WIN32_ENABLE_EGL
++   if (display_win32->gl_type == GDK_WIN32_GL_EGL)
++     return gdk_win32_display_is_egl_context_current (display, context);
++-
+++#endif
++   g_assert_not_reached ();
++   return TRUE;
++ }
 diff --git a/ports/gtk3/cairo-cpp-linkage.patch b/ports/gtk3/cairo-cpp-linkage.patch
 index dce7739b62..b699c3f451 100644
 --- a/ports/gtk3/cairo-cpp-linkage.patch
@@ -114,10 +155,10 @@ index dce7739b62..b699c3f451 100644
     default_options: [
       'buildtype=debugoptimized',
 diff --git a/ports/gtk3/portfile.cmake b/ports/gtk3/portfile.cmake
-index 13f2f08889..3dc3a11553 100644
+index 13f2f08889..96acddd07e 100644
 --- a/ports/gtk3/portfile.cmake
 +++ b/ports/gtk3/portfile.cmake
-@@ -6,12 +6,11 @@ if(buildtrees_path_length GREATER warning_length AND CMAKE_HOST_WIN32)
+@@ -6,14 +6,14 @@ if(buildtrees_path_length GREATER warning_length AND CMAKE_HOST_WIN32)
      )
  endif()
  
@@ -133,17 +174,48 @@ index 13f2f08889..3dc3a11553 100644
 +    HEAD_REF "3.24.51"
      PATCHES
          0001-build.patch
++        0002-build.patch
          cairo-cpp-linkage.patch
-diff --git a/ports/libepoxy/portfile.cmake b/ports/libepoxy/portfile.cmake
-index d39b95423d..8e04841260 100644
---- a/ports/libepoxy/portfile.cmake
-+++ b/ports/libepoxy/portfile.cmake
-@@ -15,7 +15,7 @@ vcpkg_from_github(
  )
  
- if (VCPKG_TARGET_IS_WINDOWS OR VCPKG_TARGET_IS_OSX)
--    set(OPTIONS -Dglx=no -Degl=no -Dx11=false)
-+    set(OPTIONS -Dglx=no -Degl=yes -Dx11=false)
- elseif(VCPKG_TARGET_IS_ANDROID)
-     set(OPTIONS -Dglx=no -Degl=yes -Dx11=false)
- else()
+diff --git a/ports/gtk3/vcpkg.json b/ports/gtk3/vcpkg.json
+index c931b6be9b..41b32c227d 100644
+--- a/ports/gtk3/vcpkg.json
++++ b/ports/gtk3/vcpkg.json
+@@ -1,7 +1,6 @@
+ {
+   "name": "gtk3",
+-  "version": "3.24.43",
+-  "port-version": 2,
++  "version": "3.24.51",
+   "description": "Portable library for creating graphical user interfaces.",
+   "homepage": "https://www.gtk.org/",
+   "license": null,
+diff --git a/versions/baseline.json b/versions/baseline.json
+index 368893b2d0..0d88a3aa6b 100644
+--- a/versions/baseline.json
++++ b/versions/baseline.json
+@@ -3525,7 +3525,7 @@
+       "port-version": 3
+     },
+     "gtk3": {
+-      "baseline": "3.24.43",
++      "baseline": "3.24.51",
+       "port-version": 2
+     },
+     "gtkmm": {
+diff --git a/versions/g-/gtk3.json b/versions/g-/gtk3.json
+index f31c63d6c4..c342b08a9a 100644
+--- a/versions/g-/gtk3.json
++++ b/versions/g-/gtk3.json
+@@ -1,5 +1,10 @@
+ {
+   "versions": [
++    {
++      "git-tree": "0d3e55cf22abc81b532a3011462b3195f1480974",
++      "version": "3.24.51",
++      "port-version": 0
++    },
+     {
+       "git-tree": "694065b241970f49ea673268b3a6dd4bf9f6d949",
+       "version": "3.24.43",
