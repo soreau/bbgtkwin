@@ -57,6 +57,7 @@ jobs:
           ./vcpkg install python3:x86-windows --binarysource=$binarySource
           python -m ensurepip --upgrade
           python -m pip install virtualenv
+          ./vcpkg install libcroco:x86-windows librsvg:x86-windows --binarysource=$binarySource
           ./vcpkg install gobject-introspection:x86-windows --binarysource=$binarySource
           ./vcpkg install gtk3[introspection]:x86-windows --binarysource=$binarySource
 
