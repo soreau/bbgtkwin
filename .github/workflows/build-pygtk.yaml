@@ -64,9 +64,11 @@ jobs:
 
       - name: Test the build
         shell: cmd
+        env:
+          PYTHONPATH: '${{ env.PYTHON_DIR }}/Lib/site-packages'
         run: |
           ${{ env.PYTHON }} -V
-          ${{ env.PYTHON }} show_versions.py
+          ${{ env.PYTHON }} show_versions.py || echo Test Failed! && exit 1
           :: pip is not installed
 
       - name: Upload the build artifact
