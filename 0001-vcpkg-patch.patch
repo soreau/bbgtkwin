@@ -36,6 +36,56 @@ index 82d534b447..8b7479a787 100644
      PATCHES
          fix_build_error_windows.patch
          loaders-cache.patch
+diff --git a/ports/gtk3/0001-build.patch b/ports/gtk3/0001-build.patch
+index a688118268..b3840ada7c 100644
+--- a/ports/gtk3/0001-build.patch
++++ b/ports/gtk3/0001-build.patch
+@@ -1,8 +1,43 @@
++diff --git a/gdk/win32/gdkglcontext-win32.c b/gdk/win32/gdkglcontext-win32.c
++index b1cbfa2c04..77746af798 100644
++--- a/gdk/win32/gdkglcontext-win32.c
+++++ b/gdk/win32/gdkglcontext-win32.c
++@@ -1312,7 +1312,7 @@ gdk_win32_window_invalidate_egl_framebuffer (GdkWindow *window)
++       impl->egl_force_redraw_all = TRUE;
++     }
++ }
++-
+++#ifdef GDK_WIN32_ENABLE_EGL
++ static gboolean
++ gdk_win32_display_is_egl_context_current (GdkDisplay   *display,
++                                           GdkGLContext *context)
++@@ -1321,7 +1321,7 @@ gdk_win32_display_is_egl_context_current (GdkDisplay   *display,
++ 
++   return context_egl->egl_context == eglGetCurrentContext ();
++ }
++-
+++#endif
++ static gboolean
++ gdk_win32_display_make_egl_context_current (GdkDisplay   *display,
++                                             GdkGLContext *context)
++@@ -1553,10 +1553,10 @@ gdk_win32_display_is_gl_context_current (GdkDisplay   *display,
++ 
++   if (display_win32->gl_type == GDK_WIN32_GL_WGL)
++     return gdk_win32_display_is_wgl_context_current (display, context);
++-
+++#ifdef GDK_WIN32_ENABLE_EGL
++   if (display_win32->gl_type == GDK_WIN32_GL_EGL)
++     return gdk_win32_display_is_egl_context_current (display, context);
++-
+++#endif
++   g_assert_not_reached ();
++   return TRUE;
++ }
+ diff --git a/meson.build b/meson.build
+-index c599843..0cafd79 100644
++index 397ea0730b..dd6b888fa5 100644
+ --- a/meson.build
+ +++ b/meson.build
+-@@ -1008,7 +1008,7 @@ subdir('docs/reference')
++@@ -997,7 +997,7 @@ subdir('docs/reference')
+  
+  install_data('m4macros/gtk-3.0.m4', install_dir: join_paths(get_option('datadir'), 'aclocal'))
+  
 diff --git a/ports/gtk3/cairo-cpp-linkage.patch b/ports/gtk3/cairo-cpp-linkage.patch
 index dce7739b62..b699c3f451 100644
 --- a/ports/gtk3/cairo-cpp-linkage.patch
