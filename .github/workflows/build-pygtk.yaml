@@ -45,10 +45,7 @@ jobs:
           $nuget_exe = & "./vcpkg" fetch nuget | Select-Object -Last 1
           & $nuget_exe sources add -Name "GitHub" -Source "https://nuget.pkg.github.com/soreau/index.json" -UserName "soreau" -Password "${{ secrets.VCPKG_PAT_TOKEN }}"
           & $nuget_exe setapikey "${{ secrets.VCPKG_PAT_TOKEN }}" -Source "https://nuget.pkg.github.com/soreau/index.json"
-          ./vcpkg install python3:x86-windows
-          python -m ensurepip --upgrade
-          python -m pip install virtualenv
-          ./vcpkg install libcroco:x86-windows librsvg:x86-windows gtk3[introspection]:x86-windows
+          ./vcpkg install python3:x86-windows libcroco:x86-windows librsvg:x86-windows gtk3[introspection]:x86-windows
 
       - name: Prepare for packing
         shell: bash
