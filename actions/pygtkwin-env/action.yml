@@ -7,7 +7,7 @@ runs:
     - name: Set up MSVC
       uses: ilammy/msvc-dev-cmd@v1
       with:
-        arch: x86
+        arch: x64
 
     - name: Configure pygtkwin environment
       shell: pwsh
